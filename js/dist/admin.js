@@ -1,0 +1,2 @@
+(()=>{const e={n:t=>{const o=t&&t.__esModule?()=>t.default:()=>t;return e.d(o,{a:o}),o},d:(t,o)=>{for(var r in o)e.o(o,r)&&!e.o(t,r)&&Object.defineProperty(t,r,{enumerable:!0,get:o[r]})},o:(e,t)=>Object.prototype.hasOwnProperty.call(e,t),r:e=>{Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})}};let t={};(()=>{"use strict";e.r(t),e.d(t,{extend:()=>r});const o=flarum.reg.get("core","common/extenders/Admin"),r=[new(e.n(o)())]})(),module.exports=t})();
+//# sourceMappingURL=admin.js.map

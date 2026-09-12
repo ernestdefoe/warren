@@ -1,0 +1,16 @@
+ernestdefoe-warren:
+
+  # Strings under `forum.` load on the forum frontend only, `admin.` on the
+  # admin frontend only, and `lib.`/`ref.` on both. Nothing in Warren is
+  # hardcoded English in a component — every visible string lives here so a
+  # translator can reach it.
+
+  forum:
+    vote:
+      up: Upvote
+      down: Downvote
+      score: "{count, plural, one {# point} other {# points}}"
+
+  admin:
+    settings:
+      title: Warren
