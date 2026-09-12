@@ -17,10 +17,10 @@ import Admin from 'flarum/common/extenders/Admin';
  * crash. `ernestdefoe/ridge` and `ernestdefoe/marginalia` are both sitting on
  * this right now.
  *
- * 🚨 And exported from js/src/admin/index.js and NOWHERE else. This calls
- * `app.extensionData`, which exists only on the admin frontend —
- * re-exporting it from the forum entry runs it during forum boot and takes the
- * whole forum down with "Cannot read properties of undefined (reading 'for')".
+ * 🚨 And exported from js/src/admin/index.js and NOWHERE else. This file
+ * imports `flarum/admin/app`, which does not exist on the forum frontend —
+ * re-exporting it from the forum entry runs it during forum boot and takes
+ * every page of the forum down, not just the admin panel.
  *
  * 🚨 Every field here has a reader, and extend.php names the reader beside the
  * default. A setting that is stored and never read is the commonest bug in
