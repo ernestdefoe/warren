@@ -6,6 +6,10 @@
   "(Built using AI)" stays in the title: it is required on a new extension
   thread there. A later RELEASE is a reply to this topic, never an edit of the
   opening post.
+
+  🚨 The "## Links" block at the bottom is REQUIRED, and all five lines of it:
+  GitHub, Packagist, bug reports, the support forum topic, and the licence.
+  Check each URL resolves for a logged-out visitor before posting.
 -->
 
 # Warren — a Reddit-inspired theme for Flarum 2 (Built using AI)
@@ -102,5 +106,12 @@ installed and a per-member picker.
 
 ---
 
-Source, issues and the full write-up of the schema decision:
-<https://github.com/ernestdefoe/warren>
+## Links
+
+- **GitHub:** <https://github.com/ernestdefoe/warren>
+- **Packagist:** <https://packagist.org/packages/ernestdefoe/warren>
+- **Bug reports:** <https://github.com/ernestdefoe/warren/issues>
+- **Support forum:** <https://ernestdefoe.online/d/96>
+- **Licence:** [MIT](https://github.com/ernestdefoe/warren/blob/main/LICENSE)
+
+The full write-up of the schema decision is in the README. Thanks for taking a look.
