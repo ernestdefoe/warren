@@ -92,16 +92,24 @@ return [
      *
      * Naming the relations apart is what separates the slots. It is also what
      * fof/gamification does, for what is very likely the same reason.
+     *
+     * 🚨 And the relation names must differ from the FIELD names too.
+     * Resolving an aggregate, core looks for a field whose name equals the
+     * relation name and hands it to EloquentBuffer as the relationship. A
+     * field called `warrenUpvotes` reading a relation called `warrenUpvotes`
+     * finds ITSELF — an Integer where a Relationship is required — and every
+     * request for a post dies with a TypeError from inside core. Hence
+     * `warrenVotesUp`, which nothing else answers to.
      */
     (new Extend\Model(Post::class))
         ->hasMany('warrenVotes', Vote::class, 'post_id')
         ->relationship(
-            'warrenUpvotes',
+            'warrenVotesUp',
             fn (Post $post) => $post->hasMany(Vote::class, 'post_id')
                 ->where(...votesOfDirection(1))
         )
         ->relationship(
-            'warrenDownvotes',
+            'warrenVotesDown',
             fn (Post $post) => $post->hasMany(Vote::class, 'post_id')
                 ->where(...votesOfDirection(-1))
         ),

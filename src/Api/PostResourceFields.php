@@ -48,14 +48,19 @@ class PostResourceFields
              * shared one. Flarum buffers aggregates under a key built from the
              * column and the function, so two constrained counts over
              * `warrenVotes` would share a slot and the second would serialise
-             * as null — a field that looks like it was never registered. See
-             * the relations in extend.php.
+             * as null — a field that looks like it was never registered.
+             *
+             * The relations are also named apart from these FIELDS on purpose:
+             * core resolves an aggregate by finding a field whose name equals
+             * the relation name, so a field reading a relation of its own name
+             * finds itself and every request for a post dies with a TypeError.
+             * See the relations in extend.php.
              */
             Schema\Integer::make('warrenUpvotes')
-                ->countRelation('warrenUpvotes'),
+                ->countRelation('warrenVotesUp'),
 
             Schema\Integer::make('warrenDownvotes')
-                ->countRelation('warrenDownvotes'),
+                ->countRelation('warrenVotesDown'),
 
             /*
              * 'up', 'down', or absent.
