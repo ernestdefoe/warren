@@ -68,48 +68,45 @@ return [
 
     (new Extend\ApiResource(Resource\DiscussionResource::class))
         ->fields(Api\DiscussionResourceFields::class)
-        ->endpoint(['index', 'show'], function (Endpoint\Index|Endpoint\Show $endpoint) {
-            /*
-             * 🚨 Constrained by ROW, never by column.
-             *
-             * `where user_id` narrows which rows come back, which is this
-             * extension's business. Narrowing the COLUMNS of a relation is
-             * what blanked discussion pages in Cascade — another extension
-             * included the relation, serialised the half-loaded models, and
-             * the frontend store kept posts with a null `createdAt` that
-             * core's PostStream dereferences without a guard.
-             *
-             * `warrenVotes` is Warren's own relation under its own name, so
-             * nothing else can be asking for it — and it still is not
-             * column-narrowed, because that argument holds until the day
-             * somebody else has a reason to.
-             */
+
+        /*
+         * 🚨 Index ONLY, and split from the block below for that reason.
+         *
+         * `defaultSort` exists on Endpoint\Index and on nothing else. Folding
+         * it into a mutator registered for `['index', 'show']` is a fatal on
+         * EVERY page of the forum — the extender applies the callback to each
+         * named endpoint in turn, so the Show endpoint reaches an undefined
+         * method during boot and the site 500s before it renders anything.
+         */
+        ->endpoint('index', function (Endpoint\Index $endpoint): Endpoint\Index {
             $rank = resolve(SharedSchema::class)->rankColumn();
 
+            /*
+             * 🚨 Hot is the default, and it needs a TIE-BREAK to be an
+             * ordering at all.
+             *
+             * The ranking is reddit's, and reddit's returns exactly 0 for
+             * every discussion with a score of 0 — the sign term zeroes the
+             * time term. On a forum nobody has voted on yet that is EVERY
+             * discussion, so sorting on the column alone hands back rows in
+             * whatever order the database felt like, and the front page of a
+             * new install looks shuffled.
+             *
+             * `-createdAt` after it costs nothing once scores exist and makes
+             * the empty case read as newest-first, which is what a forum with
+             * no votes should look like.
+             *
+             * Fixing this in the arithmetic instead — seeding zero-score rows
+             * with their age — was the other option and it is the wrong one:
+             * the column is shared, and an extension that writes a different
+             * number than its neighbour for the same row is how a front page
+             * reorders itself depending on who touched it last.
+             */
+            return $endpoint->defaultSort('-'.$rank.',-createdAt');
+        })
+
+        ->endpoint(['index', 'show'], function (Endpoint\Index|Endpoint\Show $endpoint) {
             return $endpoint
-                /*
-                 * 🚨 Hot is the default, and it needs a TIE-BREAK to be an
-                 * ordering at all.
-                 *
-                 * The ranking is reddit's, and reddit's returns exactly 0 for
-                 * every discussion with a score of 0 — the sign term zeroes
-                 * the time term. On a forum that has not been voted on yet
-                 * that is EVERY discussion, so sorting on the column alone
-                 * hands back rows in whatever order the database felt like.
-                 * The front page of a new install would look shuffled.
-                 *
-                 * `-createdAt` after it costs nothing once scores exist and
-                 * makes the empty case read as newest-first, which is what a
-                 * forum with no votes should look like.
-                 *
-                 * Fixing this in the arithmetic instead — seeding zero-score
-                 * rows with their age — was the other option and it is the
-                 * wrong one: the column is shared, and an extension that
-                 * writes a different number than its neighbour for the same
-                 * row is how a front page reorders itself depending on who
-                 * touched it last.
-                 */
-                ->defaultSort('-'.$rank.',-createdAt')
                 /*
                  * 🚨 The WHOLE post, never a column subset.
                  *
@@ -126,14 +123,29 @@ return [
                  * present, which is what made it look like somebody else's.
                  */
                 ->eagerLoad('firstPost')
+
+                /*
+                 * 🚨 Constrained by ROW, never by column.
+                 *
+                 * `where user_id` narrows which rows come back, which is this
+                 * extension's business. Narrowing the COLUMNS of a relation is
+                 * what blanked discussion pages in Cascade — another extension
+                 * included the relation, serialised the half-loaded models,
+                 * and the frontend store kept posts with a null `createdAt`.
+                 *
+                 * `warrenVotes` is Warren's own relation under its own name,
+                 * so nothing else can be asking for it — and it still is not
+                 * column-narrowed, because that argument holds until the day
+                 * somebody else has a reason to.
+                 */
                 ->eagerLoadWhere('warrenVotes', function ($query, Context $context) {
-                // A guest has no votes to find. Coercing to 0 rather than
-                // skipping keeps the relation MARKED loaded, which is what
-                // tells the field the difference between "no vote" and "never
-                // asked" — a null id would match nothing but still leave the
-                // field guessing.
-                $query->where('user_id', $context->getActor()->id ?? 0);
-            });
+                    // A guest has no votes to find. Coercing to 0 rather than
+                    // skipping keeps the relation MARKED loaded, which is what
+                    // tells the field the difference between "no vote" and
+                    // "never asked" — a null id would match nothing but still
+                    // leave the field guessing.
+                    $query->where('user_id', $context->getActor()->id ?? 0);
+                });
         }),
 
     /*
