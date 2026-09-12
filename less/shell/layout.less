@@ -110,7 +110,18 @@
  */
 .Warren-sidebarToggle {
   position: absolute;
-  left: calc((var(--wr-gap) + 16px) * -1);
+  /*
+   * 🚨 Measured from the PADDING box, not from the border.
+   *
+   * `left` on an absolutely positioned child resolves against the containing
+   * block's padding box, so 0 is just inside the 1px border — not at the
+   * column's outer edge. Subtracting the gap as well put the button 40px out,
+   * squarely on top of the Start a Discussion button in the rail.
+   *
+   * -17px is the border (-1) less half the button (16), which centres it on
+   * the rule.
+   */
+  left: -17px;
   top: 2px;
 
   display: inline-flex;
