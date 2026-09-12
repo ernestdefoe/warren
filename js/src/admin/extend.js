@@ -73,6 +73,27 @@ export default [
       default: true,
     }))
 
+    /*
+     * Read by the HashtagCloud widget.
+     *
+     * 🚨 Shown only when ernestdefoe/hashtags is enabled, because without it
+     * the cloud never renders and this would be a control with nothing behind
+     * it.
+     */
+    .setting(() => {
+      if (!(app.data.extensions && app.data.extensions['ernestdefoe-hashtags'])) return null;
+
+      return {
+        setting: 'ernestdefoe-warren.hashtag_count',
+        label: t('hashtag_count_label'),
+        help: t('hashtag_count_help'),
+        type: 'number',
+        min: 1,
+        max: 60,
+        default: 24,
+      };
+    })
+
     // Read by ThreadTree, which clamps it to 1-20 before using it.
     .setting(() => ({
       setting: 'ernestdefoe-warren.thread_depth',

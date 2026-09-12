@@ -344,3 +344,22 @@
   color: var(--wr-ink-dim);
   text-decoration: none;
 }
+
+/*
+ * 🚨 fof/gamification's own vote display on a row is hidden, not left beside
+ * Warren's.
+ *
+ * Warren stands its WRITES down on a gamification forum, never its UI — the
+ * arrows in the action strip drive gamification's endpoint so the theme stays
+ * one theme. The consequence is that gamification also renders its own count
+ * in the row, and a post showing two tallies of the same votes is worse than
+ * either alone.
+ *
+ * Hidden in CSS rather than removed from the ItemList in JS: the item belongs
+ * to another extension, and a theme has no business editing another
+ * extension's contributions where something else might be reading them.
+ */
+[data-warren] .DiscussionListItem-content .item-discussion-votes,
+[data-warren] .DiscussionListItem-content .DiscussionListItem-votes {
+  display: none;
+}

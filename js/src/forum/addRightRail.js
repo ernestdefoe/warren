@@ -1,6 +1,8 @@
 import app from 'flarum/forum/app';
 import { extend } from 'flarum/common/extend';
 import ItemList from 'flarum/common/utils/ItemList';
+
+import HashtagCloud from './components/HashtagCloud';
 import IndexPage from 'flarum/forum/components/IndexPage';
 import Button from 'flarum/common/components/Button';
 import Icon from 'flarum/common/components/Icon';
@@ -73,6 +75,19 @@ export function widgetItems() {
   // the column below is dropped entirely when it has no widgets.
   if (app.forum.attribute('warrenShowAbout') !== false) {
     items.add('about', aboutCard(), 100);
+  }
+
+  /*
+   * 🚨 Gated on the hashtags extension being ENABLED, not on the route
+   * existing or the request succeeding.
+   *
+   * Without the gate every forum without it pays a request that 404s on every
+   * page load, and the reader briefly sees a loading panel for a feature the
+   * forum does not have. The server tells us, because the frontend cannot see
+   * the extension list for itself.
+   */
+  if (app.forum.attribute('warrenHasHashtags')) {
+    items.add('hashtags', <HashtagCloud />, 80);
   }
 
   return items;

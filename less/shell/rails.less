@@ -136,3 +136,31 @@
   border: 0;
   border-radius: var(--wr-radius);
 }
+
+// -- The hashtag cloud ------------------------------------------------------
+//
+// Weights are set by RANK, so the five sizes are always all in use however
+// lopsided the underlying counts are. See HashtagCloud.
+.Warren-hashtags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  line-height: 1.5;
+}
+
+.Warren-hashtag {
+  color: var(--wr-ink-dim);
+  white-space: nowrap;
+}
+
+.Warren-hashtag:hover {
+  color: var(--wr-accent);
+  text-decoration: underline;
+}
+
+.Warren-hashtag--w5 { font-size: 20px; font-weight: 700; color: var(--wr-ink); }
+.Warren-hashtag--w4 { font-size: 17px; font-weight: 600; color: var(--wr-ink); }
+.Warren-hashtag--w3 { font-size: 15px; font-weight: 600; }
+.Warren-hashtag--w2 { font-size: 13px; }
+.Warren-hashtag--w1 { font-size: 12px; color: var(--wr-ink-faint); }

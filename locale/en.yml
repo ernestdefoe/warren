@@ -24,6 +24,8 @@ ernestdefoe-warren:
 
     rail:
       about: About this community
+      hashtags: Popular hashtags
+      hashtags_count: "{count, plural, one {# post} other {# posts}}"
       members: Members
       discussions: Discussions
       comments: Comments
@@ -43,6 +45,9 @@ ernestdefoe-warren:
 
       show_about_label: Show the About panel
       show_about_help: The panel on the right with the forum's description, its counts and a button to start a discussion. Turn it off and the feed takes the space back.
+
+      hashtag_count_label: Hashtags in the cloud
+      hashtag_count_help: How many of the most-used hashtags the rail shows. Only appears when the Hashtags extension is enabled.
 
       thread_depth_label: Maximum reply indent
       thread_depth_help: How far a reply can move right before it stops. Deeper replies still sit under their parent, they just stop indenting — which keeps a long back-and-forth from walking off the side of the column.

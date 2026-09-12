@@ -1,6 +1,6 @@
 {
     "name": "ernestdefoe/warren",
-    "description": "Warren — a Reddit-inspired theme for Flarum 2. A vote gutter, compact link rows, Hot/New/Top sorting and threaded comments. Shares fof/gamification's vote tables, so nothing is lost either way.",
+    "description": "Warren — a Reddit-inspired theme for Flarum 2. Compact post rows with a vote pill, image and text previews, Hot/New/Top sorting, a collapsible rail and threaded comments. Shares fof/gamification's vote tables, so nothing is lost either way.",
     "type": "flarum-extension",
     "keywords": [
         "flarum",
@@ -47,5 +47,9 @@
     },
     "config": {
         "sort-packages": true
+    },
+    "support": {
+        "issues": "https://github.com/ernestdefoe/warren/issues",
+        "source": "https://github.com/ernestdefoe/warren"
     }
 }

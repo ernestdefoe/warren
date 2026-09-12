@@ -153,7 +153,10 @@ return [
         ->default('ernestdefoe-warren.show_about', true)
         ->serializeToForum('warrenShowAbout', 'ernestdefoe-warren.show_about', 'boolval')
         // read by ThreadTree
-        ->default('ernestdefoe-warren.thread_depth', 8),
+        ->default('ernestdefoe-warren.thread_depth', 8)
+        // read by the HashtagCloud widget
+        ->default('ernestdefoe-warren.hashtag_count', 24)
+        ->serializeToForum('warrenHashtagCount', 'ernestdefoe-warren.hashtag_count', 'intval'),
 
     (new Extend\ApiResource(Resource\ForumResource::class))
         ->fields(Api\ForumResourceFields::class),

@@ -95,6 +95,17 @@ class ForumResourceFields
 
             Schema\Str::make('warrenTopSort')
                 ->get(fn (): string => '-votes'),
+
+            /*
+             * Whether the hashtag cloud has anything to read.
+             *
+             * 🚨 Sent, because the frontend cannot see which extensions are
+             * enabled. Without it every forum without ernestdefoe/hashtags
+             * pays a request that 404s on every page load, and the reader
+             * watches a loading panel for a feature the forum does not have.
+             */
+            Schema\Boolean::make('warrenHasHashtags')
+                ->get(fn (): bool => $this->extensions->isEnabled('ernestdefoe-hashtags')),
         ];
     }
 
