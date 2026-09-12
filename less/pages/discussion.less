@@ -220,3 +220,37 @@
   width: 26px;
   height: 24px;
 }
+
+// -- Threading --------------------------------------------------------------
+//
+// The indent is a variable set per item by JS, so the whole ladder is one rule
+// and there is no generated class per level.
+//
+// The rail is a left border on a padded box rather than a pseudo-element:
+// a border is exactly as tall as the post it belongs to, including a post that
+// grows when an image finishes loading, which a fixed-height decoration is not.
+[data-warren] .PostStream-item.Warren-threaded {
+  margin-left: calc(var(--wr-depth, 0) * 24px);
+  padding-left: 16px;
+  border-left: 2px solid var(--wr-line);
+}
+
+[data-warren] .PostStream-item.Warren-threaded:hover {
+  border-left-color: var(--wr-line-strong);
+}
+
+/*
+ * A collapsed subtree.
+ *
+ * 🚨 `display: none`, not `visibility` or a height of zero. The stream
+ * measures item heights to decide what to load next, and an item that is
+ * invisible but still occupies space makes it load a page nobody can see.
+ */
+[data-warren] .PostStream-item.Warren-hidden {
+  display: none;
+}
+
+.Warren-collapse {
+  // Narrower than the other pills: it is a chevron with a count, not a verb.
+  padding: 0 10px;
+}

@@ -7,7 +7,9 @@
 namespace ErnestDefoe\Warren\Api;
 
 use ErnestDefoe\Warren\SharedSchema;
+use ErnestDefoe\Warren\Threading\ThreadTree;
 use Flarum\Api\Context;
+use Flarum\Api\Resource\DiscussionResource;
 use Flarum\Api\Schema;
 use Flarum\Discussion\Discussion;
 use Flarum\Post\CommentPost;
@@ -36,7 +38,8 @@ class DiscussionResourceFields
     private const EXCERPT_LENGTH = 220;
 
     public function __construct(
-        protected SharedSchema $schema
+        protected SharedSchema $schema,
+        protected ThreadTree $threads
     ) {
     }
 
@@ -102,6 +105,27 @@ class DiscussionResourceFields
             Schema\Str::make('warrenExcerpt')
                 ->visible(fn (Discussion $discussion, Context $context) => $this->canPreview($discussion, $context))
                 ->get(fn (Discussion $discussion): ?string => $this->excerpt($discussion)),
+
+            /*
+             * The post ids in reply order, and a depth for each.
+             *
+             * 🚨 Sent as one field rather than as a `warrenDepth` on every
+             * post, because the ORDER is the part the client cannot work out
+             * for itself. The browser holds one page of a discussion at a
+             * time; it cannot know that post 400 belongs under post 3 until it
+             * has fetched both, and by then it has already drawn them in the
+             * wrong place.
+             *
+             * 🚨 Gated to the discussion page, exactly like core's own post
+             * linkage. On the index this would be an id list per row for
+             * twenty discussions nobody has opened.
+             */
+            Schema\Arr::make('warrenThread')
+                ->visible(fn (Discussion $discussion, Context $context) => $context->showing(DiscussionResource::class))
+                ->get(fn (Discussion $discussion, Context $context): array => $this->threads->for(
+                    $discussion,
+                    $context->getActor()
+                )),
         ];
     }
 

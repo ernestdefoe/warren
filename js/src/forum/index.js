@@ -8,6 +8,7 @@ import addRightRail from './addRightRail';
 import addSidebarToggle from './addSidebarToggle';
 import addSortOptions from './addSortOptions';
 import addPostVotes from './addPostVotes';
+import addThreading from './addThreading';
 import dontTranslateAvatars from './dontTranslateAvatars';
 
 // NOTE: the Admin extender is exported from js/src/admin/index.js and NOWHERE
@@ -36,6 +37,9 @@ Post.prototype.warrenDownvotes = Model.attribute('warrenDownvotes');
 Post.prototype.warrenUserVote = Model.attribute('warrenUserVote');
 Post.prototype.warrenCanVote = Model.attribute('warrenCanVote');
 
+// The reply order and a depth per post, for the whole discussion at once.
+Discussion.prototype.warrenThread = Model.attribute('warrenThread');
+
 /*
  * Priority -100 so this initializer runs LAST.
  *
@@ -51,5 +55,6 @@ app.initializers.add('ernestdefoe-warren', () => {
   addSidebarToggle();
   addSortOptions();
   addPostVotes();
+  addThreading();
   dontTranslateAvatars();
 }, -100);

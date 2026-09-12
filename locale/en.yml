@@ -14,6 +14,10 @@ ernestdefoe-warren:
       hot: Hot
       top: Top
 
+    thread:
+      collapse: Collapse
+      expand: "{count, plural, one {# reply} other {# replies}}"
+
     sidebar:
       collapse: Collapse the sidebar
       expand: Show the sidebar
