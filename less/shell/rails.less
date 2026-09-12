@@ -1,5 +1,9 @@
 // ============================================================================
 // Rail furniture
+//
+// Both rails are made of the same card: a coloured head, a bordered body. The
+// About card on the right is the piece that finishes the layout - a feed with
+// one rail reads as a forum with a sidebar, a feed with two reads as this.
 // ============================================================================
 
 .Warren-card {
@@ -11,39 +15,91 @@
 }
 
 .Warren-card-head {
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--wr-line-soft);
-  font-size: 12px;
+  padding: 12px 12px;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--wr-ink-dim);
+  color: var(--wr-ink);
+}
+
+// The accent bar at the top of the About card. It takes the forum's own
+// primary colour rather than inventing one, so a forum that has chosen its
+// palette in Appearance keeps it.
+.Warren-card-head--accent {
+  background: var(--primary-color);
+  color: #fff;
 }
 
 .Warren-card-body {
-  padding: 12px 14px;
-  font-size: 13px;
+  padding: 12px;
+  font-size: 14px;
   color: var(--wr-ink-dim);
 }
 
-.Warren-card-body p {
-  margin: 0 0 8px;
+.Warren-about-text {
+  margin: 0 0 12px;
+  line-height: 1.5;
 }
 
 .Warren-card-stat {
   display: flex;
   justify-content: space-between;
-  padding: 4px 0;
+  align-items: baseline;
+  padding: 6px 0;
+  border-top: 1px solid var(--wr-line-soft);
+  font-size: 13px;
+  // Two numbers in a column that do not line up read as an accident.
   font-variant-numeric: tabular-nums;
+}
+
+.Warren-card-stat span:first-child {
+  color: var(--wr-ink-faint);
 }
 
 .Warren-card-stat span:last-child {
   color: var(--wr-ink);
+  font-weight: 700;
+}
+
+.Warren-about-cta {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  border-radius: var(--wr-radius-pill);
+  font-weight: 700;
+}
+
+// -- The left rail ----------------------------------------------------------
+//
+// Core's index nav becomes a single card so the two rails are made of the same
+// material. Without this the left column is bare text beside two bordered
+// boxes, which reads as an unfinished page rather than as a deliberate one.
+[data-warren] .App--index .IndexPage-nav .sideNav {
+  padding: 8px;
+  background: var(--wr-surface);
+  border: 1px solid var(--wr-line-soft);
+  border-radius: var(--wr-radius);
+}
+
+[data-warren] .App--index .sideNav li > a,
+[data-warren] .App--index .sideNav .Dropdown-toggle {
+  border-radius: var(--wr-radius-pill);
+  color: var(--wr-ink-dim);
   font-weight: 600;
 }
 
-// The left nav, restyled into pills.
-[data-warren] .App--index .sideNav .Dropdown-toggle,
-[data-warren] .App--index .sideNav li > a {
+[data-warren] .App--index .sideNav li > a:hover,
+[data-warren] .App--index .sideNav .Dropdown-toggle:hover {
+  background: var(--wr-hover);
+  color: var(--wr-ink);
+}
+
+[data-warren] .App--index .sideNav .active > a {
+  background: var(--wr-hover);
+  color: var(--wr-ink);
+}
+
+// The start-discussion button is the rail's one piece of colour.
+[data-warren] .App--index .IndexPage-newDiscussion {
   border-radius: var(--wr-radius-pill);
+  font-weight: 700;
 }

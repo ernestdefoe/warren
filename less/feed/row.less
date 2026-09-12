@@ -2,20 +2,18 @@
 // The feed row
 //
 // Core builds DiscussionListItem from ItemLists, so Warren adds to it rather
-// than replacing it:
+// than replacing it. The row is a two-column grid:
 //
-//   .DiscussionListItem
-//     .DiscussionListItem-content          <- the card
-//       .Warren-gutter                     (new)  arrows + score
-//       .Warren-main                       (new)
-//         .Warren-byline                   (new)  tag, author, time
-//         .DiscussionListItem-title
-//         .DiscussionListItem-info         core terminal post + flarum/tags
-//         .Warren-actions                  (new)  comments, share
-//     .DiscussionListItem-controls         the ... menu
+//   .DiscussionListItem-content
+//     .Warren-gutter                  (new)  arrows + score, spans every row
+//     .Warren-byline                  (new)  community, author, when, badges
+//     .DiscussionListItem-main        core title + info line, untouched
+//     .Warren-actions                 (new)  comments, share
+//     .DiscussionListItem-stats       core stats bubble, hidden
 //
-// Keeping core items in place is what lets flarum/tags, fof/best-answer,
-// sticky, locked and every other list decorator keep working untouched.
+// Nothing is re-parented. Lifting core's items into a wrapper of Warren's own
+// would produce the same picture and break every extension that walks the DOM
+// for `.DiscussionListItem-main`.
 // ============================================================================
 
 /*
@@ -23,15 +21,14 @@
  *
  * At @tablet-up core pulls the row 15px outside its own box on both sides,
  * pads it back, and tints it on hover. In a card layout that paints the hover
- * tint AROUND the card and puts the ... control outside its right edge. The
- * card is the surface here, so all of it goes.
+ * tint AROUND the card and puts the ... control outside its right edge.
  *
  * The attribute selector adds specificity over the core rule without reaching
  * for !important.
  */
 [data-warren] .DiscussionListItem {
   position: relative;
-  margin: 0 0 8px;
+  margin: 0 0 var(--wr-row-gap);
   padding: 0;
   border: 0;
   background: transparent;
@@ -45,34 +42,24 @@
 // -- The card ---------------------------------------------------------------
 [data-warren] .DiscussionListItem-content {
   display: grid;
-  // The gutter is a fixed column and the rest takes what is left.
-  // `minmax(0, 1fr)` rather than `1fr`: a grid child defaults to a min-width of
-  // `auto`, so one long unbroken title would push the row wider than the feed
-  // instead of wrapping inside it.
+  // minmax(0, 1fr) rather than 1fr: a grid child defaults to a min-width of
+  // auto, so one long unbroken title would widen the whole row instead of
+  // wrapping inside it.
   grid-template-columns: var(--wr-gutter) minmax(0, 1fr);
-  gap: 0 8px;
+  gap: 0;
   align-items: start;
-  padding: var(--wr-row-pad);
 
   background: var(--wr-surface);
   border: 1px solid var(--wr-line-soft);
   border-radius: var(--wr-radius);
   color: var(--wr-ink);
-  overflow: hidden;
+  transition: border-color 0.1s ease;
 }
 
 [data-warren] .DiscussionListItem-content:hover {
-  border-color: var(--wr-line);
+  border-color: var(--wr-line-strong);
 }
 
-/*
- * Nothing is re-parented to build the two columns.
- *
- * The gutter spans every row of column one and everything core renders falls
- * into column two. Lifting core's items into a wrapper of Warren's own would
- * have been the obvious way to get the same picture, and it would break every
- * other extension that walks the DOM for `.DiscussionListItem-main`.
- */
 [data-warren] .DiscussionListItem-content > .Warren-gutter {
   grid-column: 1;
   grid-row: 1 / -1;
@@ -80,18 +67,25 @@
 
 [data-warren] .DiscussionListItem-content > *:not(.Warren-gutter) {
   grid-column: 2;
-  // A grid child's default min-width is `auto`, so without this one long
-  // unbroken word in a title widens the whole row instead of wrapping.
+  // Without this, one long unbroken word widens the row instead of wrapping.
   min-width: 0;
 }
 
 // -- The vote gutter --------------------------------------------------------
+//
+// The tinted strip down the left is the single most recognisable thing about
+// this layout, more so than the arrows, which plenty of forums have. It is
+// deliberately a flat tint rather than a gradient or a border: the strip has
+// to read as part of the card, not as a component bolted to the side of one.
 .Warren-gutter {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 0;
+  padding: 8px 0;
   background: var(--wr-gutter-bg);
+  border-radius: calc(var(--wr-radius) - 1px) 0 0 calc(var(--wr-radius) - 1px);
+  align-self: stretch;
 }
 
 .Warren-arrow {
@@ -100,8 +94,8 @@
   justify-content: center;
   // Touch target around a small glyph. The mobile rules widen the target
   // rather than the arrow.
-  width: 32px;
-  height: 28px;
+  width: 28px;
+  height: 24px;
   padding: 0;
   border: 0;
   border-radius: var(--wr-radius-sm);
@@ -127,7 +121,7 @@
 }
 
 .Warren-arrow .icon {
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .Warren-arrow--up.Warren-arrow--active,
@@ -141,6 +135,7 @@
 }
 
 .Warren-score {
+  padding: 1px 0;
   font-size: 12px;
   font-weight: 700;
   // Digits in a fixed column that redraws on every vote. Without this the
@@ -152,54 +147,69 @@
 .Warren-score--up   { color: var(--wr-up); }
 .Warren-score--down { color: var(--wr-down); }
 
-/*
- * Core's author column, reduced to its badges.
- *
- * The item itself stays in the list — it carries sticky, locked and whatever
- * other extensions add — so only the picture goes, and Warren's byline
- * supplies a smaller one in a line of text where it belongs.
- */
-[data-warren] .DiscussionListItem-author-avatar,
-[data-warren] .DiscussionListItem-author .Avatar {
-  display: none;
-}
-
-[data-warren] .DiscussionListItem-author {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-// -- The body ---------------------------------------------------------------
+// -- The byline -------------------------------------------------------------
 .Warren-byline {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 4px;
+  padding: 8px var(--wr-row-pad) 0 var(--wr-row-pad);
   font-size: 12px;
-  color: var(--wr-ink-dim);
+  line-height: 1.4;
+  color: var(--wr-ink-faint);
 }
 
-.Warren-byline .Avatar {
-  width: var(--wr-avatar);
-  height: var(--wr-avatar);
-  font-size: 10px;
-  line-height: var(--wr-avatar);
-}
-
-.Warren-byline-tag {
+.Warren-community {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-weight: 700;
   color: var(--wr-ink);
 }
 
-.Warren-byline-sep {
+.Warren-community:hover {
+  color: var(--wr-ink);
+  text-decoration: underline;
+}
+
+// The tag's own colour, as a dot. A full chip would compete with the title for
+// the eye; a dot says which community this is and then gets out of the way.
+.Warren-community-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--wr-ink-faint);
+}
+
+.Warren-byline-meta a {
   color: var(--wr-ink-faint);
+  font-weight: 600;
+}
+
+.Warren-byline-meta a:hover {
+  color: var(--wr-ink-dim);
+  text-decoration: underline;
+}
+
+.Warren-byline-sep {
+  margin: 0 4px;
+  color: var(--wr-ink-faint);
+}
+
+.Warren-byline .DiscussionListItem-badges {
+  margin: 0;
+  padding: 0;
+}
+
+// -- Title and info ---------------------------------------------------------
+[data-warren] .DiscussionListItem-main {
+  display: block;
+  padding: 2px var(--wr-row-pad) 0 var(--wr-row-pad);
 }
 
 [data-warren] .DiscussionListItem-title {
   display: block;
-  margin: 0 0 4px;
+  margin: 0;
   font-size: 17px;
   font-weight: 600;
   line-height: 1.3;
@@ -208,10 +218,33 @@
   text-wrap: balance;
 }
 
+[data-warren] .DiscussionListItem:hover .DiscussionListItem-title {
+  color: var(--wr-ink);
+}
+
+/*
+ * The info line stays, minus the two items the byline and the action bar have
+ * already said.
+ *
+ * Hiding the whole line would be simpler and would take every OTHER
+ * extension's info item with it, which are exactly the contributions a theme
+ * has no business dropping. Two display rules cost nothing and leave the list
+ * open.
+ */
 [data-warren] .DiscussionListItem-info {
-  margin: 0;
+  margin: 4px 0 0;
+  padding: 0 var(--wr-row-pad);
   font-size: 12px;
-  color: var(--wr-ink-dim);
+  color: var(--wr-ink-faint);
+}
+
+[data-warren] .DiscussionListItem-info > .item-tags,
+[data-warren] .DiscussionListItem-info > .item-terminalPost {
+  display: none;
+}
+
+[data-warren] .DiscussionListItem-info:empty {
+  display: none;
 }
 
 // The stats bubble duplicates the comment count in the action bar, in a shape
@@ -224,37 +257,42 @@
 .Warren-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
-  margin-top: 6px;
+  gap: 2px;
+  padding: 4px 8px 6px;
 }
 
 .Warren-action {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 30px;
-  padding: 0 10px;
+  height: 28px;
+  padding: 0 8px;
   border: 0;
-  border-radius: var(--wr-radius-pill);
+  border-radius: var(--wr-radius-sm);
   background: transparent;
-  color: var(--wr-ink-dim);
+  color: var(--wr-ink-faint);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
 }
 
 .Warren-action:hover {
   background: var(--wr-hover);
-  color: var(--wr-ink);
+  color: var(--wr-ink-dim);
+  text-decoration: none;
 }
 
 .Warren-action .icon {
   font-size: 13px;
 }
 
-// The ... menu, back inside the card.
+// The ... menu, inside the card and out of the title's way.
 [data-warren] .DiscussionListItem-controls {
   position: absolute;
-  top: 6px;
-  right: 6px;
+  top: 4px;
+  right: 4px;
+}
+
+[data-warren] .DiscussionListItem-controls .Dropdown-toggle {
+  color: var(--wr-ink-faint);
 }

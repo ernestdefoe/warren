@@ -3,101 +3,112 @@
 //
 // Two rules govern this file, both learned the hard way in Cascade.
 //
-// 1. Colour is declared inside core's own `[data-theme^=light|dark]` blocks,
-//    never behind `prefers-color-scheme`. rc.8 ships four modes — light, dark,
-//    light-hc, dark-hc — with a real user preference behind them. A theme that
+// 1. Colour is declared inside core's own [data-theme^=light|dark] blocks,
+//    never behind prefers-color-scheme. rc.8 ships four modes - light, dark,
+//    light-hc, dark-hc - with a real user preference behind them. A theme that
 //    keys off the media query fights that preference and leaves both
 //    high-contrast modes unstyled.
 //
 // 2. Warren sets core variables that core actually defines, and namespaces
-//    everything of its own as `--wr-*`. It never invents an alias pointing at
-//    a variable core does not define: such a declaration is invalid at
-//    computed-value time, the property falls back to *inheritance*, and you
-//    get white-on-white in places nobody tests.
+//    everything of its own as --wr-*. It never invents an alias pointing at a
+//    variable core does not define: such a declaration is invalid at
+//    computed-value time, the property falls back to INHERITANCE, and you get
+//    white-on-white in places nobody tests.
 // ============================================================================
 
-// ── Geometry ────────────────────────────────────────────────────────────────
+// -- Geometry ---------------------------------------------------------------
 :root {
-  --wr-rail-left:     264px;
+  --wr-rail-left:     260px;
   --wr-rail-right:    312px;
   --wr-feed-width:    640px;
   --wr-gap:           24px;
 
-  --wr-radius:        8px;
-  --wr-radius-sm:     4px;
+  --wr-radius:        4px;
+  --wr-radius-sm:     2px;
   --wr-radius-pill:   999px;
 
-  // The vote gutter. Wide enough for a 24px arrow with a real touch target
-  // around it, which is the number that decides the whole row grid.
+  // The vote gutter. Wide enough for the arrows with a real touch target
+  // around them, and it is this number that decides the whole row grid.
   --wr-gutter:        40px;
 
-  --wr-row-pad:       12px;
+  --wr-row-pad:       10px;
+  --wr-row-gap:       10px;
   --wr-avatar:        20px;
 
   // Warren draws its own byline, so core's fixed avatar column would only add
   // dead space to the left of the gutter.
   --avatar-column-width: 0px;
 
-  --container-hd:     1288px;
-  --container-xl:     1288px;
-  --container-xxl:    1288px;
+  --container-hd:     1296px;
+  --container-xl:     1296px;
+  --container-xxl:    1296px;
 }
 
-// Compact density: Reddit's "classic" rows. Same grid, less air.
+// Compact density: the classic dense list. Same grid, less air.
 [data-warren='compact'] {
   --wr-row-pad:       8px;
-  --wr-radius:        4px;
+  --wr-row-gap:       4px;
+  --wr-radius:        2px;
 }
 
-// ── Light ───────────────────────────────────────────────────────────────────
+// -- Light ------------------------------------------------------------------
 //
-// The ground is a cool grey rather than white, and the card is white on top of
-// it. That inversion is what makes a list of rows read as a list rather than
-// as one long page, and it is the single most recognisable thing about this
-// family of layouts.
+// The ground is a cool grey and the card is white on top of it. That inversion
+// is what makes a list of rows read as a list rather than as one long page,
+// and it is the most recognisable thing about this family of layouts after the
+// gutter itself.
 [data-theme^='light'] {
-  --wr-ground:        #f2f4f5;
+  --wr-ground:        #dae0e6;
   --wr-surface:       #ffffff;
-  --wr-surface-alt:   #f7f8f9;
-  --wr-hover:         #f0f2f3;
+  --wr-surface-alt:   #f8f9fa;
+  --wr-hover:         #eef1f3;
 
-  --wr-line:          #d7dde0;
-  --wr-line-soft:     #e6eaec;
+  --wr-line:          #ccd2d6;
+  --wr-line-soft:     #dfe3e6;
+  --wr-line-strong:   #98a2a8;
 
-  --wr-ink:           #16191c;
-  --wr-ink-dim:       #5c6a72;
-  --wr-ink-faint:     #7c8a92;
+  --wr-ink:           #1a1a1b;
+  --wr-ink-dim:       #4a5257;
+  --wr-ink-faint:     #7c858b;
 
-  --wr-up:            #d93a00;
-  --wr-down:          #5a6fd6;
-  --wr-gutter-bg:     transparent;
+  --wr-up:            #ff4500;
+  --wr-down:          #7193ff;
+
+  // The tinted strip down the left of every card.
+  --wr-gutter-bg:     #f8f9fa;
+
+  --wr-header-bg:     #ffffff;
 }
 
-// ── Dark ────────────────────────────────────────────────────────────────────
+// -- Dark -------------------------------------------------------------------
 //
 // Not an inversion of the light ramp. The surface is lifted off the ground by
 // a couple of points of lightness rather than by a border, because a 1px
 // border at these values reads as a seam rather than as an edge.
 [data-theme^='dark'] {
-  --wr-ground:        #0b1416;
-  --wr-surface:       #141a1d;
-  --wr-surface-alt:   #1a2226;
-  --wr-hover:         #1d262a;
+  --wr-ground:        #030303;
+  --wr-surface:       #1a1a1b;
+  --wr-surface-alt:   #161617;
+  --wr-hover:         #272729;
 
-  --wr-line:          #2a3439;
-  --wr-line-soft:     #1f282c;
+  --wr-line:          #343536;
+  --wr-line-soft:     #343536;
+  --wr-line-strong:   #818384;
 
-  --wr-ink:           #e6eef1;
-  --wr-ink-dim:       #a3b2ba;
-  --wr-ink-faint:     #7d8d96;
+  --wr-ink:           #d7dadc;
+  --wr-ink-dim:       #b8bbbe;
+  --wr-ink-faint:     #818384;
 
-  --wr-up:            #ff5722;
+  --wr-up:            #ff4500;
   --wr-down:          #7193ff;
-  --wr-gutter-bg:     transparent;
+
+  --wr-gutter-bg:     #161617;
+
+  --wr-header-bg:     #1a1a1b;
 }
 
-// High-contrast modes inherit the ramp above through the `^=` prefix match,
-// then take core's own stronger text colour so the two do not fight.
+// The high-contrast modes inherit the ramp above through the ^= prefix match,
+// then take a stronger text colour so the two do not fight.
 [data-theme='light-hc'] { --wr-ink: #000; --wr-ink-dim: #333; --wr-line: #000; }
 [data-theme='dark-hc']  { --wr-ink: #fff; --wr-ink-dim: #ddd; --wr-line: #fff; }
 
@@ -109,11 +120,11 @@ body {
 /*
  * The scrollbar.
  *
- * 🚨 Invisible to every automated check. Headless Chrome and the in-app
- * browser pane both report a scrollbar width of 0 and screenshot nothing
- * there, so an unstyled track beside a dark page reads as a grey stripe that
- * only the person looking at a real browser can see. Five rounds were spent
- * chasing that stripe in Cascade before anyone thought to name it.
+ * Invisible to every automated check: headless Chrome and the in-app browser
+ * pane both report a scrollbar width of 0 and screenshot nothing there, so an
+ * unstyled track beside a dark page reads as a grey stripe only the person at
+ * a real browser can see. Five rounds went into chasing that stripe in Cascade
+ * before anyone thought to name it.
  */
 [data-warren] {
   scrollbar-color: var(--wr-line) var(--wr-ground);

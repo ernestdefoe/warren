@@ -1,0 +1,50 @@
+// ============================================================================
+// The header
+//
+// A thin, light bar with the title on the left and the session controls on the
+// right. Core's header is already that shape; what it is not is quiet, and the
+// layout below it depends on the header not competing with the cards.
+// ============================================================================
+
+[data-warren] .App-header {
+  background: var(--wr-header-bg);
+  border-bottom: 1px solid var(--wr-line-soft);
+  box-shadow: none;
+  color: var(--wr-ink);
+}
+
+[data-warren] .App-header .Header-title,
+[data-warren] .App-header .Header-title a {
+  color: var(--wr-ink);
+  font-weight: 700;
+}
+
+[data-warren] .Header-controls > li > a,
+[data-warren] .Header-controls .Button--link {
+  color: var(--wr-ink-dim);
+}
+
+[data-warren] .Header-controls > li > a:hover,
+[data-warren] .Header-controls .Button--link:hover {
+  color: var(--wr-ink);
+}
+
+// The search field, as a pill on a tinted ground.
+[data-warren] .Search-input .FormControl {
+  background: var(--wr-hover);
+  border: 1px solid transparent;
+  border-radius: var(--wr-radius-pill);
+  color: var(--wr-ink);
+}
+
+[data-warren] .Search--focused .Search-input .FormControl {
+  background: var(--wr-surface);
+  border-color: var(--wr-line-strong);
+}
+
+// Sign up / log in, the two controls a logged-out reader is meant to find.
+[data-warren] .item-signUp .Button,
+[data-warren] .item-logIn .Button {
+  border-radius: var(--wr-radius-pill);
+  font-weight: 700;
+}

@@ -3,6 +3,7 @@ import Model from 'flarum/common/Model';
 import Discussion from 'flarum/common/models/Discussion';
 
 import decorateRow from './decorateRow';
+import addRightRail from './addRightRail';
 import dontTranslateAvatars from './dontTranslateAvatars';
 
 // NOTE: the Admin extender is exported from js/src/admin/index.js and NOWHERE
@@ -22,7 +23,17 @@ Discussion.prototype.warrenScore = Model.attribute('warrenScore');
 Discussion.prototype.warrenRank = Model.attribute('warrenRank');
 Discussion.prototype.warrenUserVote = Model.attribute('warrenUserVote');
 
+/*
+ * Priority -100 so this initializer runs LAST.
+ *
+ * `extend()` wraps: each registration wraps the previous one, so the callback
+ * registered last runs last. The rail needs that for
+ * `PageStructure.containerItems`, where it adopts fof/forum-widgets-core's
+ * side section out of the list. Registering first would mean looking for that
+ * item before FoF had added it, and the forum would get a fourth column.
+ */
 app.initializers.add('ernestdefoe-warren', () => {
   decorateRow();
+  addRightRail();
   dontTranslateAvatars();
-});
+}, -100);
