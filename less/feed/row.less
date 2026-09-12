@@ -2,14 +2,20 @@
 // The feed row
 //
 // Core builds DiscussionListItem from ItemLists, so Warren adds to it rather
-// than replacing it. The row is a two-column grid:
+// than replacing it:
 //
-//   .DiscussionListItem-content
-//     .Warren-gutter                  (new)  arrows + score, spans every row
-//     .Warren-byline                  (new)  community, author, when, badges
-//     .DiscussionListItem-main        core title + info line, untouched
-//     .Warren-actions                 (new)  comments, share
-//     .DiscussionListItem-stats       core stats bubble, hidden
+//   .DiscussionListItem
+//     .DiscussionListItem-content
+//       .Warren-byline                  (new)  avatar, community, when
+//       .DiscussionListItem-main        core's title + info line, untouched
+//       .Warren-actions                 (new)  vote pill, comments, share
+//     .DiscussionListItem-controls      the ... menu
+//
+// 🚨 The vote control is a HORIZONTAL PILL at the foot of the post, not a
+// column down its left. The left gutter is the old layout; the one this theme
+// is named after moved the arrows into the action strip years ago, and getting
+// that wrong is the single change that stops the page reading right no matter
+// how well the colours match.
 //
 // Nothing is re-parented. Lifting core's items into a wrapper of Warren's own
 // would produce the same picture and break every extension that walks the DOM
@@ -20,11 +26,8 @@
  * Undo the tablet-up bleed.
  *
  * At @tablet-up core pulls the row 15px outside its own box on both sides,
- * pads it back, and tints it on hover. In a card layout that paints the hover
- * tint AROUND the card and puts the ... control outside its right edge.
- *
- * The attribute selector adds specificity over the core rule without reaching
- * for !important.
+ * pads it back, and tints it on hover. Warren does its own hover on its own
+ * box, so core's has to go or the two paint different rectangles.
  */
 [data-warren] .DiscussionListItem {
   position: relative;
@@ -39,131 +42,51 @@
   background: transparent;
 }
 
-// -- The card ---------------------------------------------------------------
-[data-warren] .DiscussionListItem-content {
-  display: grid;
-  // minmax(0, 1fr) rather than 1fr: a grid child defaults to a min-width of
-  // auto, so one long unbroken title would widen the whole row instead of
-  // wrapping inside it.
-  grid-template-columns: var(--wr-gutter) minmax(0, 1fr);
-  gap: 0;
-  align-items: start;
-
-  background: var(--wr-surface);
-  border: 1px solid var(--wr-line-soft);
-  border-radius: var(--wr-radius);
-  color: var(--wr-ink);
-  transition: border-color 0.1s ease;
-}
-
-[data-warren] .DiscussionListItem-content:hover {
-  border-color: var(--wr-line-strong);
-}
-
-[data-warren] .DiscussionListItem-content > .Warren-gutter {
-  grid-column: 1;
-  grid-row: 1 / -1;
-}
-
-[data-warren] .DiscussionListItem-content > *:not(.Warren-gutter) {
-  grid-column: 2;
-  // Without this, one long unbroken word widens the row instead of wrapping.
-  min-width: 0;
-}
-
-// -- The vote gutter --------------------------------------------------------
+// -- The post ---------------------------------------------------------------
 //
-// The tinted strip down the left is the single most recognisable thing about
-// this layout, more so than the arrows, which plenty of forums have. It is
-// deliberately a flat tint rather than a gradient or a border: the strip has
-// to read as part of the card, not as a component bolted to the side of one.
-.Warren-gutter {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  padding: 8px 0;
-  background: var(--wr-gutter-bg);
-  border-radius: calc(var(--wr-radius) - 1px) 0 0 calc(var(--wr-radius) - 1px);
-  align-self: stretch;
-}
-
-.Warren-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  // Touch target around a small glyph. The mobile rules widen the target
-  // rather than the arrow.
-  width: 28px;
-  height: 24px;
-  padding: 0;
-  border: 0;
-  border-radius: var(--wr-radius-sm);
+// No border and no card. Posts sit directly on the ground, separated by air,
+// and the whole block lifts on hover. A bordered card would be the obvious
+// thing to build and is exactly what the reference stopped doing.
+[data-warren] .DiscussionListItem-content {
+  display: block;
+  padding: var(--wr-row-pad-y) var(--wr-row-pad-x) 4px;
+  border-radius: var(--wr-radius);
   background: transparent;
-  color: var(--wr-ink-faint);
-  cursor: pointer;
-  line-height: 1;
-}
-
-.Warren-arrow:hover {
-  background: var(--wr-hover);
-  color: var(--wr-ink-dim);
-}
-
-.Warren-arrow:disabled {
-  cursor: default;
-  opacity: 0.45;
-}
-
-.Warren-arrow:disabled:hover {
-  background: transparent;
-  color: var(--wr-ink-faint);
-}
-
-.Warren-arrow .icon {
-  font-size: 13px;
-}
-
-.Warren-arrow--up.Warren-arrow--active,
-.Warren-arrow--up.Warren-arrow--active:hover {
-  color: var(--wr-up);
-}
-
-.Warren-arrow--down.Warren-arrow--active,
-.Warren-arrow--down.Warren-arrow--active:hover {
-  color: var(--wr-down);
-}
-
-.Warren-score {
-  padding: 1px 0;
-  font-size: 12px;
-  font-weight: 700;
-  // Digits in a fixed column that redraws on every vote. Without this the
-  // score visibly jitters as 9 becomes 10.
-  font-variant-numeric: tabular-nums;
   color: var(--wr-ink);
+  transition: background-color 0.1s ease;
 }
 
-.Warren-score--up   { color: var(--wr-up); }
-.Warren-score--down { color: var(--wr-down); }
+[data-warren] .DiscussionListItem:hover .DiscussionListItem-content {
+  background: var(--wr-hover);
+}
+
+// A hairline between posts, and none after the last one - a divider with
+// nothing under it is a line drawn across the bottom of the page.
+[data-warren] .DiscussionList-discussions > li:not(:last-child) .DiscussionListItem::after {
+  content: '';
+  display: block;
+  height: 1px;
+  margin: 0 var(--wr-row-pad-x);
+  background: var(--wr-line);
+}
 
 // -- The byline -------------------------------------------------------------
 .Warren-byline {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
-  padding: 8px var(--wr-row-pad) 0 var(--wr-row-pad);
+  gap: 8px;
+  padding: 4px 0 6px;
   font-size: 12px;
-  line-height: 1.4;
+  line-height: 1.3;
   color: var(--wr-ink-faint);
 }
 
 .Warren-community {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-weight: 700;
+  gap: 8px;
+  font-weight: 600;
   color: var(--wr-ink);
 }
 
@@ -172,18 +95,21 @@
   text-decoration: underline;
 }
 
-// The tag's own colour, as a dot. A full chip would compete with the title for
-// the eye; a dot says which community this is and then gets out of the way.
+// The community mark. A tag with a colour gets its colour; a forum with no
+// tags gets a neutral disc rather than a gap where a picture should be.
 .Warren-community-dot {
-  width: 8px;
-  height: 8px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: var(--wr-ink-faint);
+  background: var(--wr-pill-hover);
+}
+
+.Warren-byline-meta {
+  color: var(--wr-ink-faint);
 }
 
 .Warren-byline-meta a {
   color: var(--wr-ink-faint);
-  font-weight: 600;
 }
 
 .Warren-byline-meta a:hover {
@@ -204,15 +130,15 @@
 // -- Title and info ---------------------------------------------------------
 [data-warren] .DiscussionListItem-main {
   display: block;
-  padding: 2px var(--wr-row-pad) 0 var(--wr-row-pad);
+  padding: 0;
 }
 
 [data-warren] .DiscussionListItem-title {
   display: block;
   margin: 0;
-  font-size: 17px;
-  font-weight: 600;
-  line-height: 1.3;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.35;
   color: var(--wr-ink);
   // A title is the one place a ragged last word reads as sloppy.
   text-wrap: balance;
@@ -223,18 +149,18 @@
 }
 
 /*
- * The info line stays, minus the two items the byline and the action bar have
- * already said.
+ * The info line stays, minus the two items the byline and the action strip
+ * have already said.
  *
  * Hiding the whole line would be simpler and would take every OTHER
- * extension's info item with it, which are exactly the contributions a theme
- * has no business dropping. Two display rules cost nothing and leave the list
- * open.
+ * extension's info item with it - exactly the contributions a theme has no
+ * business dropping. Two display rules cost nothing and leave the list open.
  */
 [data-warren] .DiscussionListItem-info {
   margin: 4px 0 0;
-  padding: 0 var(--wr-row-pad);
-  font-size: 12px;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1.5;
   color: var(--wr-ink-faint);
 }
 
@@ -247,50 +173,133 @@
   display: none;
 }
 
-// The stats bubble duplicates the comment count in the action bar, in a shape
-// that belongs to a different layout.
+// The stats bubble duplicates the comment count in the action strip, in a
+// shape that belongs to a different layout.
 [data-warren] .DiscussionListItem-stats {
   display: none;
 }
 
-// -- The action bar ---------------------------------------------------------
+// -- The action strip -------------------------------------------------------
 .Warren-actions {
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 4px 8px 6px;
+  gap: 8px;
+  padding: 8px 0 4px;
 }
 
+// Every control in the strip is the same pill, which is what makes the bottom
+// of a post read as one object rather than as three loose buttons.
 .Warren-action {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 28px;
-  padding: 0 8px;
+  height: var(--wr-pill-h);
+  padding: 0 12px;
   border: 0;
-  border-radius: var(--wr-radius-sm);
-  background: transparent;
-  color: var(--wr-ink-faint);
+  border-radius: var(--wr-radius-pill);
+  background: var(--wr-pill);
+  color: var(--wr-ink-dim);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .Warren-action:hover {
-  background: var(--wr-hover);
-  color: var(--wr-ink-dim);
+  background: var(--wr-pill-hover);
+  color: var(--wr-ink);
   text-decoration: none;
 }
 
 .Warren-action .icon {
-  font-size: 13px;
+  font-size: 14px;
 }
 
-// The ... menu, inside the card and out of the title's way.
+// -- The vote pill ----------------------------------------------------------
+.Warren-votes {
+  display: inline-flex;
+  align-items: center;
+  height: var(--wr-pill-h);
+  padding: 0 4px;
+  border-radius: var(--wr-radius-pill);
+  background: var(--wr-pill);
+}
+
+// The pill takes the vote's colour once a side has been chosen, which is how
+// a reader sees their own vote from across the page rather than by squinting
+// at one small arrow.
+.Warren-votes--up {
+  background: var(--wr-up);
+}
+
+.Warren-votes--down {
+  background: var(--wr-down);
+}
+
+.Warren-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--wr-ink-dim);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.Warren-arrow:hover {
+  background: var(--wr-pill-hover);
+  color: var(--wr-ink);
+}
+
+.Warren-arrow:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.Warren-arrow:disabled:hover {
+  background: transparent;
+}
+
+.Warren-arrow .icon {
+  font-size: 14px;
+}
+
+.Warren-score {
+  min-width: 20px;
+  padding: 0 2px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  // Digits in a control that redraws on every vote. Without this the score
+  // visibly jitters as 9 becomes 10 and the arrows shuffle sideways with it.
+  font-variant-numeric: tabular-nums;
+  color: var(--wr-ink-dim);
+}
+
+// On a coloured pill everything inside it goes white, arrows included.
+.Warren-votes--up .Warren-arrow,
+.Warren-votes--up .Warren-score,
+.Warren-votes--down .Warren-arrow,
+.Warren-votes--down .Warren-score {
+  color: var(--wr-accent-ink);
+}
+
+.Warren-votes--up .Warren-arrow:hover,
+.Warren-votes--down .Warren-arrow:hover {
+  background: rgba(0, 0, 0, 0.18);
+  color: var(--wr-accent-ink);
+}
+
+// The ... menu, top right of the post and out of the title's way.
 [data-warren] .DiscussionListItem-controls {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 8px;
+  right: 12px;
 }
 
 [data-warren] .DiscussionListItem-controls .Dropdown-toggle {

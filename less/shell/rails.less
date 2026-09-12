@@ -1,36 +1,30 @@
 // ============================================================================
 // Rail furniture
 //
-// Both rails are made of the same card: a coloured head, a bordered body. The
-// About card on the right is the piece that finishes the layout - a feed with
-// one rail reads as a forum with a sidebar, a feed with two reads as this.
+// Both rails are made of the same material: a soft-cornered panel lifted off
+// the ground by lightness rather than by a border, and pills for anything
+// clickable. The right-hand panel is what finishes the layout - a feed with
+// one rail reads as a forum with a sidebar; a feed with two reads as this.
 // ============================================================================
 
 .Warren-card {
   margin-bottom: 16px;
   background: var(--wr-surface);
-  border: 1px solid var(--wr-line-soft);
   border-radius: var(--wr-radius);
   overflow: hidden;
 }
 
 .Warren-card-head {
-  padding: 12px 12px;
-  font-size: 14px;
+  padding: 14px 16px 6px;
+  font-size: 12px;
   font-weight: 700;
-  color: var(--wr-ink);
-}
-
-// The accent bar at the top of the About card. It takes the forum's own
-// primary colour rather than inventing one, so a forum that has chosen its
-// palette in Appearance keeps it.
-.Warren-card-head--accent {
-  background: var(--primary-color);
-  color: #fff;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--wr-ink-faint);
 }
 
 .Warren-card-body {
-  padding: 12px;
+  padding: 6px 16px 16px;
   font-size: 14px;
   color: var(--wr-ink-dim);
 }
@@ -38,17 +32,21 @@
 .Warren-about-text {
   margin: 0 0 12px;
   line-height: 1.5;
+  color: var(--wr-ink-dim);
 }
 
 .Warren-card-stat {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  padding: 6px 0;
-  border-top: 1px solid var(--wr-line-soft);
+  padding: 7px 0;
   font-size: 13px;
   // Two numbers in a column that do not line up read as an accident.
   font-variant-numeric: tabular-nums;
+}
+
+.Warren-card-stat + .Warren-card-stat {
+  border-top: 1px solid var(--wr-line);
 }
 
 .Warren-card-stat span:first-child {
@@ -57,34 +55,45 @@
 
 .Warren-card-stat span:last-child {
   color: var(--wr-ink);
-  font-weight: 700;
+  font-weight: 600;
 }
 
+// The one filled control on the page, in the theme's own accent rather than
+// the forum's. A reader who has just read the description is the likeliest
+// person on the page to post, so this is where the colour is spent.
 .Warren-about-cta {
   display: block;
   width: 100%;
+  height: 40px;
   margin-top: 12px;
+  border: 0;
   border-radius: var(--wr-radius-pill);
+  background: var(--wr-accent);
+  color: var(--wr-accent-ink);
   font-weight: 700;
 }
 
+.Warren-about-cta:hover,
+.Warren-about-cta:focus,
+.Warren-about-cta:active {
+  background: var(--wr-accent);
+  color: var(--wr-accent-ink);
+  filter: brightness(1.08);
+}
+
 // -- The left rail ----------------------------------------------------------
-//
-// Core's index nav becomes a single card so the two rails are made of the same
-// material. Without this the left column is bare text beside two bordered
-// boxes, which reads as an unfinished page rather than as a deliberate one.
 [data-warren] .App--index .IndexPage-nav .sideNav {
-  padding: 8px;
-  background: var(--wr-surface);
-  border: 1px solid var(--wr-line-soft);
-  border-radius: var(--wr-radius);
+  padding: 0 8px;
 }
 
 [data-warren] .App--index .sideNav li > a,
 [data-warren] .App--index .sideNav .Dropdown-toggle {
-  border-radius: var(--wr-radius-pill);
-  color: var(--wr-ink-dim);
-  font-weight: 600;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: var(--wr-radius-sm);
+  color: var(--wr-ink);
+  font-size: 14px;
+  font-weight: 400;
 }
 
 [data-warren] .App--index .sideNav li > a:hover,
@@ -94,12 +103,36 @@
 }
 
 [data-warren] .App--index .sideNav .active > a {
-  background: var(--wr-hover);
+  background: var(--wr-pill);
   color: var(--wr-ink);
+  font-weight: 600;
 }
 
-// The start-discussion button is the rail's one piece of colour.
+[data-warren] .App--index .sideNav .icon {
+  color: var(--wr-ink-dim);
+}
+
+// The start-discussion button, as the rail's filled pill.
 [data-warren] .App--index .IndexPage-newDiscussion {
+  height: 40px;
+  border: 0;
   border-radius: var(--wr-radius-pill);
+  background: var(--wr-accent);
+  color: var(--wr-accent-ink);
   font-weight: 700;
+}
+
+[data-warren] .App--index .IndexPage-newDiscussion:hover,
+[data-warren] .App--index .IndexPage-newDiscussion:focus {
+  background: var(--wr-accent);
+  color: var(--wr-accent-ink);
+  filter: brightness(1.08);
+}
+
+// Anything else a rail widget puts down there, brought onto the same ground.
+[data-warren] .Warren-rail .WidgetItem,
+[data-warren] .Warren-rail .Widget {
+  background: var(--wr-surface);
+  border: 0;
+  border-radius: var(--wr-radius);
 }

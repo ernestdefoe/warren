@@ -43,30 +43,36 @@
 }
 
 @media (max-width: 767px) {
-  // Touch targets. 44px is the floor, and the gutter grows rather than the
-  // glyph: a bigger arrow would unbalance the row, a bigger target is
-  // invisible until a thumb needs it.
+  /*
+   * Touch targets. 44px is the floor, and the PILL grows rather than the
+   * glyph: a bigger arrow would unbalance the strip, a bigger target is
+   * invisible until a thumb needs it.
+   */
   :root {
-    --wr-gutter: 44px;
+    --wr-pill-h: 40px;
+    --wr-row-pad-x: 12px;
   }
 
   .Warren-arrow {
-    width: 44px;
+    width: 40px;
     height: 36px;
   }
 
-  .Warren-action {
-    height: 36px;
-    min-height: 36px;
+  .Warren-actions {
+    // The strip can outgrow a phone once an extension adds to it. Scrolling
+    // it beats wrapping into a second row that pushes the next post down.
+    overflow-x: auto;
+    // 🚨 Only this axis is non-visible, and nothing here opens a menu. Per
+    // spec a non-visible value on one axis forces the other from `visible` to
+    // `auto`, so a container with a dropdown in it would eat its own menu.
+    scrollbar-width: none;
+  }
+
+  .Warren-actions::-webkit-scrollbar {
+    display: none;
   }
 
   [data-warren] .DiscussionListItem-content {
     border-radius: 0;
-    border-left: 0;
-    border-right: 0;
-  }
-
-  [data-warren] .DiscussionListItem {
-    margin-bottom: 0;
   }
 }

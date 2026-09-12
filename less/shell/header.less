@@ -1,14 +1,15 @@
 // ============================================================================
 // The header
 //
-// A thin, light bar with the title on the left and the session controls on the
-// right. Core's header is already that shape; what it is not is quiet, and the
-// layout below it depends on the header not competing with the cards.
+// A thin bar on the same ground as the page, a long rounded search field
+// across the middle, and pills on the right. The header has to recede: the
+// posts are the page, and a header with its own colour competes with every
+// piece of furniture below it.
 // ============================================================================
 
 [data-warren] .App-header {
   background: var(--wr-header-bg);
-  border-bottom: 1px solid var(--wr-line-soft);
+  border-bottom: 1px solid var(--wr-line);
   box-shadow: none;
   color: var(--wr-ink);
 }
@@ -20,7 +21,8 @@
 }
 
 [data-warren] .Header-controls > li > a,
-[data-warren] .Header-controls .Button--link {
+[data-warren] .Header-controls .Button--link,
+[data-warren] .Header-controls .Button {
   color: var(--wr-ink-dim);
 }
 
@@ -29,22 +31,58 @@
   color: var(--wr-ink);
 }
 
-// The search field, as a pill on a tinted ground.
-[data-warren] .Search-input .FormControl {
-  background: var(--wr-hover);
+// The search field: a long pill on a tinted ground, which is the header's one
+// real piece of shape.
+[data-warren] .Search-input .FormControl,
+[data-warren] .App-header .Search .FormControl {
+  height: 40px;
+  padding-left: 40px;
+  background: var(--wr-pill);
   border: 1px solid transparent;
   border-radius: var(--wr-radius-pill);
   color: var(--wr-ink);
 }
 
 [data-warren] .Search--focused .Search-input .FormControl {
-  background: var(--wr-surface);
+  background: var(--wr-ground);
   border-color: var(--wr-line-strong);
 }
 
-// Sign up / log in, the two controls a logged-out reader is meant to find.
-[data-warren] .item-signUp .Button,
-[data-warren] .item-logIn .Button {
+[data-warren] .Search-input .FormControl::placeholder {
+  color: var(--wr-ink-faint);
+}
+
+// Sign up and log in, the two controls a logged-out reader is meant to find.
+// Sign up carries the accent; log in stays quiet beside it.
+[data-warren] .item-signUp .Button {
+  height: 36px;
+  border: 0;
   border-radius: var(--wr-radius-pill);
+  background: var(--wr-accent);
+  color: var(--wr-accent-ink);
   font-weight: 700;
+}
+
+[data-warren] .item-signUp .Button:hover {
+  background: var(--wr-accent);
+  color: var(--wr-accent-ink);
+  filter: brightness(1.08);
+}
+
+[data-warren] .item-logIn .Button {
+  height: 36px;
+  border-radius: var(--wr-radius-pill);
+  background: var(--wr-pill);
+  color: var(--wr-ink);
+  font-weight: 700;
+}
+
+[data-warren] .item-logIn .Button:hover {
+  background: var(--wr-pill-hover);
+  color: var(--wr-ink);
+}
+
+// The drawer toggle and session avatar, on the same ground as everything else.
+[data-warren] .Header-secondary .Dropdown-toggle {
+  border-radius: var(--wr-radius-pill);
 }

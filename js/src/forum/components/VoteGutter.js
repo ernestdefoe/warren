@@ -4,7 +4,13 @@ import Icon from 'flarum/common/components/Icon';
 import classList from 'flarum/common/utils/classList';
 
 /**
- * The arrows and the score, down the left of a row.
+ * The vote pill: two arrows around a score, sitting in the action strip at the
+ * foot of a post.
+ *
+ * 🚨 Horizontal, and in the action strip. A column of arrows down the left of
+ * a card is the older layout; this one moved them years ago, and it is the
+ * single change that stops the page reading right no matter how well the
+ * colours are matched.
  *
  * 🚨 One control, two backends.
  *
@@ -14,7 +20,7 @@ import classList from 'flarum/common/utils/classList';
  * not standing the THEME down: a Reddit layout with somebody else's thumb
  * buttons in the middle of it is two themes, not one.
  *
- * So the control is always this one, and the field it writes changes
+ * So the control is always this one and the field it writes changes
  * underneath. The server says which in `warrenVoteField`, because the frontend
  * cannot see which extensions are enabled and a wrong guess is a control that
  * silently does nothing.
@@ -26,9 +32,9 @@ export default class VoteGutter extends Component {
     /*
      * The optimistic copy the arrows render from.
      *
-     * A vote is a round trip, and an arrow that waits for it feels broken on
+     * A vote is a round trip, and an arrow that waits for one feels broken on
      * any connection worse than a desk. These hold the answer we expect; the
-     * response overwrites them, and a failure puts them back.
+     * response confirms them and a failure puts them back.
      */
     this.score = null;
     this.vote = null;
@@ -39,14 +45,12 @@ export default class VoteGutter extends Component {
     const discussion = this.attrs.discussion;
 
     const score = this.score === null ? discussion.warrenScore() || 0 : this.score;
-    const vote = this.vote === null ? discussion.warrenUserVote() : this.vote;
+    const vote = this.currentVote();
 
     return (
-      <div className="Warren-gutter">
+      <div className={classList('Warren-votes', vote && `Warren-votes--${vote}`)}>
         {this.arrow('up', vote === 'up')}
-        <span className={classList('Warren-score', vote && `Warren-score--${vote}`)}>
-          {this.format(score)}
-        </span>
+        <span className="Warren-score">{this.format(score)}</span>
         {this.arrow('down', vote === 'down')}
       </div>
     );
@@ -70,7 +74,11 @@ export default class VoteGutter extends Component {
         aria-pressed={active ? 'true' : 'false'}
         aria-label={label}
         title={label}
-        onclick={() => this.cast(direction, active)}
+        onclick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.cast(direction, active);
+        }}
       >
         <Icon name={direction === 'up' ? 'fas fa-arrow-up' : 'fas fa-arrow-down'} />
       </button>
@@ -78,15 +86,18 @@ export default class VoteGutter extends Component {
   }
 
   /**
-   * Reddit's abbreviation, and not only for width: a four-digit score in a
-   * 40px column either overflows or shrinks the type below the row's smallest
-   * readable size.
+   * Abbreviated, and not only for width: a five-digit score makes the arrows
+   * on either side of it shuffle sideways every time the number grows.
    */
   format(score) {
     if (score >= 10000) return `${(score / 1000).toFixed(0)}k`;
     if (score >= 1000) return `${(score / 1000).toFixed(1)}k`;
 
     return String(score);
+  }
+
+  currentVote() {
+    return this.vote === null ? this.attrs.discussion.warrenUserVote() : this.vote;
   }
 
   cast(direction, active) {
@@ -96,7 +107,6 @@ export default class VoteGutter extends Component {
     }
 
     const discussion = this.attrs.discussion;
-    const firstPost = discussion.firstPost();
 
     /*
      * 🚨 The vote is written to the POST, and on a list row the post is not
@@ -104,18 +114,23 @@ export default class VoteGutter extends Component {
      * nothing to PATCH, so the arrows stay put rather than firing a request
      * that would 404.
      */
-    const postId = firstPost ? firstPost.id() : discussion.data.relationships?.firstPost?.data?.id;
+    const firstPost = discussion.firstPost();
+    const postId = firstPost
+      ? firstPost.id()
+      : discussion.data.relationships?.firstPost?.data?.id;
 
     if (!postId) return;
 
     const before = { score: this.score, vote: this.vote };
+    const was = this.currentVote();
 
     // Clicking the arrow you already chose clears the vote, which is what the
     // server does too — the two have to agree or the optimistic number is
-    // wrong for the length of one round trip.
+    // wrong for the length of a round trip.
     const next = active ? null : direction;
-    const delta = (next === 'up' ? 1 : next === 'down' ? -1 : 0)
-      - (this.currentVote() === 'up' ? 1 : this.currentVote() === 'down' ? -1 : 0);
+    const delta =
+      (next === 'up' ? 1 : next === 'down' ? -1 : 0) -
+      (was === 'up' ? 1 : was === 'down' ? -1 : 0);
 
     this.vote = next;
     this.score = (this.score === null ? discussion.warrenScore() || 0 : this.score) + delta;
@@ -133,11 +148,11 @@ export default class VoteGutter extends Component {
         this.saving = false;
 
         /*
-         * The discussion carries the authoritative score, and it is not in the
-         * response to a post PATCH. Writing our optimistic value back onto the
-         * model keeps the two in step for anything else reading it on this
-         * page — a second gutter for the same discussion, the sort, the
-         * discussion page after a navigation.
+         * The discussion carries the authoritative score and it is not in the
+         * response to a post PATCH. Writing the optimistic value back onto the
+         * model keeps everything else on the page in step with it — the sort,
+         * the discussion page after a navigation, a second control for the
+         * same discussion.
          */
         discussion.pushAttributes({ warrenScore: this.score, warrenUserVote: this.vote });
 
@@ -152,9 +167,5 @@ export default class VoteGutter extends Component {
 
         throw error;
       });
-  }
-
-  currentVote() {
-    return this.vote === null ? this.attrs.discussion.warrenUserVote() : this.vote;
   }
 }

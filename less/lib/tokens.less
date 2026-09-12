@@ -17,94 +17,101 @@
 // ============================================================================
 
 // -- Geometry ---------------------------------------------------------------
+//
+// The radii are the giveaway. This layout is built from large soft rectangles
+// and fully round pills, not from the 4px corners a forum theme reaches for by
+// default - get those two numbers wrong and no amount of colour matching makes
+// the page read right.
 :root {
-  --wr-rail-left:     260px;
-  --wr-rail-right:    312px;
-  --wr-feed-width:    640px;
+  --wr-rail-left:     272px;
+  --wr-rail-right:    316px;
+  --wr-feed-width:    752px;
   --wr-gap:           24px;
 
-  --wr-radius:        4px;
-  --wr-radius-sm:     2px;
+  --wr-radius:        16px;
+  --wr-radius-sm:     8px;
   --wr-radius-pill:   999px;
 
-  // The vote gutter. Wide enough for the arrows with a real touch target
-  // around them, and it is this number that decides the whole row grid.
-  --wr-gutter:        40px;
+  --wr-row-pad-x:     16px;
+  --wr-row-pad-y:     8px;
+  --wr-row-gap:       0px;
 
-  --wr-row-pad:       10px;
-  --wr-row-gap:       10px;
   --wr-avatar:        20px;
 
+  // The action pills. 32px is the height every control in the row shares, and
+  // it is what makes the bottom of a post read as one strip rather than as
+  // three unrelated buttons.
+  --wr-pill-h:        32px;
+
   // Warren draws its own byline, so core's fixed avatar column would only add
-  // dead space to the left of the gutter.
+  // dead space down the left of every row.
   --avatar-column-width: 0px;
 
-  --container-hd:     1296px;
-  --container-xl:     1296px;
-  --container-xxl:    1296px;
+  --container-hd:     1408px;
+  --container-xl:     1408px;
+  --container-xxl:    1408px;
 }
 
-// Compact density: the classic dense list. Same grid, less air.
+// Compact density: the classic dense list. Same anatomy, less air.
 [data-warren='compact'] {
-  --wr-row-pad:       8px;
-  --wr-row-gap:       4px;
-  --wr-radius:        2px;
+  --wr-row-pad-y:     4px;
+  --wr-radius:        8px;
+  --wr-pill-h:        28px;
 }
 
 // -- Light ------------------------------------------------------------------
-//
-// The ground is a cool grey and the card is white on top of it. That inversion
-// is what makes a list of rows read as a list rather than as one long page,
-// and it is the most recognisable thing about this family of layouts after the
-// gutter itself.
 [data-theme^='light'] {
-  --wr-ground:        #dae0e6;
-  --wr-surface:       #ffffff;
-  --wr-surface-alt:   #f8f9fa;
-  --wr-hover:         #eef1f3;
+  --wr-ground:        #ffffff;
+  --wr-surface:       #f6f8f9;
+  --wr-surface-alt:   #ffffff;
+  --wr-hover:         #f2f4f5;
+  --wr-pill:          #eaedef;
+  --wr-pill-hover:    #dfe3e6;
 
-  --wr-line:          #ccd2d6;
-  --wr-line-soft:     #dfe3e6;
-  --wr-line-strong:   #98a2a8;
+  --wr-line:          #e5ebee;
+  --wr-line-soft:     #eceff1;
+  --wr-line-strong:   #d2dadd;
 
-  --wr-ink:           #1a1a1b;
-  --wr-ink-dim:       #4a5257;
-  --wr-ink-faint:     #7c858b;
+  --wr-ink:           #0f1a1c;
+  --wr-ink-dim:       #5c6c74;
+  --wr-ink-faint:     #6a737c;
 
-  --wr-up:            #ff4500;
-  --wr-down:          #7193ff;
-
-  // The tinted strip down the left of every card.
-  --wr-gutter-bg:     #f8f9fa;
+  --wr-accent:        #d93a00;
+  --wr-accent-ink:    #ffffff;
+  --wr-up:            #d93a00;
+  --wr-down:          #5a6fd6;
 
   --wr-header-bg:     #ffffff;
 }
 
 // -- Dark -------------------------------------------------------------------
 //
-// Not an inversion of the light ramp. The surface is lifted off the ground by
-// a couple of points of lightness rather than by a border, because a 1px
-// border at these values reads as a seam rather than as an edge.
+// The ground is near-black and the panels are lifted off it by a few points of
+// lightness rather than by a border. A 1px line at these values reads as a
+// seam; the absence of one is most of why the dark version looks the way it
+// does.
 [data-theme^='dark'] {
-  --wr-ground:        #030303;
-  --wr-surface:       #1a1a1b;
-  --wr-surface-alt:   #161617;
-  --wr-hover:         #272729;
+  --wr-ground:        #0e1113;
+  --wr-surface:       #181c1f;
+  --wr-surface-alt:   #131619;
+  --wr-hover:         #131619;
+  --wr-pill:          #1e2225;
+  --wr-pill-hover:    #2a3236;
 
-  --wr-line:          #343536;
-  --wr-line-soft:     #343536;
-  --wr-line-strong:   #818384;
+  --wr-line:          #1e2225;
+  --wr-line-soft:     #181c1f;
+  --wr-line-strong:   #2a3236;
 
-  --wr-ink:           #d7dadc;
-  --wr-ink-dim:       #b8bbbe;
-  --wr-ink-faint:     #818384;
+  --wr-ink:           #eef1f3;
+  --wr-ink-dim:       #b7c0c4;
+  --wr-ink-faint:     #8ba0a8;
 
+  --wr-accent:        #ff4500;
+  --wr-accent-ink:    #ffffff;
   --wr-up:            #ff4500;
   --wr-down:          #7193ff;
 
-  --wr-gutter-bg:     #161617;
-
-  --wr-header-bg:     #1a1a1b;
+  --wr-header-bg:     #0e1113;
 }
 
 // The high-contrast modes inherit the ramp above through the ^= prefix match,
@@ -112,8 +119,10 @@
 [data-theme='light-hc'] { --wr-ink: #000; --wr-ink-dim: #333; --wr-line: #000; }
 [data-theme='dark-hc']  { --wr-ink: #fff; --wr-ink-dim: #ddd; --wr-line: #fff; }
 
-// The forum's own ground, so the cards have something to sit on.
-body {
+// The forum's own ground. Without an explicit background here the page keeps
+// whatever core painted and every panel above floats on the wrong colour.
+body,
+[data-warren] .App {
   background: var(--wr-ground);
 }
 
@@ -122,10 +131,10 @@ body {
  *
  * Invisible to every automated check: headless Chrome and the in-app browser
  * pane both report a scrollbar width of 0 and screenshot nothing there, so an
- * unstyled track beside a dark page reads as a grey stripe only the person at
- * a real browser can see. Five rounds went into chasing that stripe in Cascade
- * before anyone thought to name it.
+ * unstyled track beside a near-black page reads as a pale stripe that only the
+ * person at a real browser can see. Five rounds went into chasing that stripe
+ * in Cascade before anyone thought to name it.
  */
 [data-warren] {
-  scrollbar-color: var(--wr-line) var(--wr-ground);
+  scrollbar-color: var(--wr-line-strong) var(--wr-ground);
 }

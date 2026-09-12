@@ -1,6 +1,5 @@
 import app from 'flarum/forum/app';
 import { extend } from 'flarum/common/extend';
-import Avatar from 'flarum/common/components/Avatar';
 import Icon from 'flarum/common/components/Icon';
 import Link from 'flarum/common/components/Link';
 import listItems from 'flarum/common/helpers/listItems';
@@ -10,21 +9,21 @@ import humanTime from 'flarum/common/utils/humanTime';
 import VoteGutter from './components/VoteGutter';
 
 /**
- * Turn the discussion list row into a link row with a vote gutter.
+ * Turn the discussion list row into a post.
  *
- * The row is a two-column grid. The gutter spans every row of column one;
- * everything else stacks down column two in the order the ItemList puts it:
+ * This ADDS to DiscussionListItem's ItemLists rather than replacing the
+ * component:
  *
- *   byline    community · posted by · when
+ *   byline    community mark · community · posted by · when
  *   main      core's title and info line, untouched
- *   actions   comments · share
+ *   actions   the vote pill, the comment count, share
  *
- * 🚨 The byline and the action bar are SIBLINGS of core's main view, not
+ * 🚨 The byline and the action strip are SIBLINGS of core's main view, not
  * children of it. `mainView()` is a `<Link>`, so a button nested inside it
  * would be a button inside an anchor — invalid HTML that browsers un-nest on
  * their own, moving the control somewhere nobody styled. There is also no
- * `mainItems` ItemList to add to; the first version of this file assumed there
- * was, and rendered nothing at all.
+ * `mainItems` ItemList to add to; an earlier version of this file assumed
+ * there was and rendered nothing at all.
  */
 export default function decorateRow() {
   /*
@@ -38,10 +37,7 @@ export default function decorateRow() {
   extend('flarum/forum/components/DiscussionListItem', 'contentItems', function (items) {
     const discussion = this.attrs.discussion;
 
-    // 110 puts the gutter above core's author (100), so it is the row's first
-    // child and lands in grid column one with no ordering rules at all.
-    items.add('warrenGutter', <VoteGutter discussion={discussion} />, 110);
-    items.add('warrenByline', bylineView(discussion), 95);
+    items.add('warrenByline', bylineView(discussion), 110);
     items.add('warrenActions', actionsView(discussion), 60);
 
     /*
@@ -51,8 +47,8 @@ export default function decorateRow() {
      * inside the same item, so sticky, locked and every badge another
      * extension contributes would quietly stop appearing on the list, with
      * nothing to connect the loss to this line. The byline renders
-     * `discussion.badges()` itself, which is the same ItemList every one of
-     * those extensions adds to.
+     * `discussion.badges()` itself, which is the same ItemList all of those
+     * extensions add to.
      */
     items.remove('author');
   });
@@ -79,32 +75,37 @@ function bylineView(discussion) {
   const tag = tags && tags.length ? tags[0] : null;
   const badges = discussion.badges().toArray();
 
+  const mark = (
+    <span
+      className="Warren-community-dot"
+      style={tag && tag.color() ? { background: tag.color() } : null}
+    />
+  );
+
   return (
     <div className="Warren-byline">
       {tag ? (
         <Link className="Warren-community" href={app.route.tag(tag)}>
-          <span
-            className="Warren-community-dot"
-            style={tag.color() ? { background: tag.color() } : null}
-          />
+          {mark}
           {tag.name()}
         </Link>
-      ) : null}
+      ) : (
+        <span className="Warren-community">{mark}</span>
+      )}
 
       <span className="Warren-byline-meta">
         {/*
           * 🚨 The placeholder is `author`, NOT `user`.
           *
           * Flarum's translator gives a parameter literally named `user`
-          * special handling: it runs it through the username helper, which
-          * calls `displayName()` on it. Passing a vnode — a link around the
-          * name, which is the whole point here — throws `t.displayName is not
-          * a function` from inside the translator.
+          * special handling: it runs the value through the username helper,
+          * which calls `displayName()` on it. Passing a vnode — a link around
+          * the name, which is the whole point here — throws `t.displayName is
+          * not a function` from inside the translator.
           *
-          * The throw happens while the ItemList callback is still running, so
-          * everything this extension adds AFTER the failing line is silently
-          * missing from the row. The gutter rendered, the byline and the
-          * action bar did not, and nothing in the error named either of them.
+          * The throw happens while this ItemList callback is still running, so
+          * everything added AFTER the failing line is silently missing from
+          * the row, and nothing in the error names either piece.
           */}
         {app.translator.trans('ernestdefoe-warren.forum.row.posted_by', {
           author: user ? <Link href={app.route.user(user)}>{username(user)}</Link> : username(user),
@@ -125,6 +126,8 @@ function actionsView(discussion) {
 
   return (
     <div className="Warren-actions">
+      <VoteGutter discussion={discussion} />
+
       <Link className="Warren-action" href={app.route.discussion(discussion)}>
         <Icon name="far fa-comment-alt" />
         {app.translator.trans('ernestdefoe-warren.forum.row.comments', { count })}
@@ -135,6 +138,7 @@ function actionsView(discussion) {
         className="Warren-action"
         onclick={(e) => {
           e.preventDefault();
+          e.stopPropagation();
           share(discussion);
         }}
       >
@@ -149,16 +153,17 @@ function actionsView(discussion) {
  * 🚨 Copies the link, and SAYS SO.
  *
  * A Share button that opens nothing and shows nothing is the commonest kind of
- * dead control: it is built, worded, styled and does its job invisibly, so
+ * dead control: built, worded, styled, and doing its job invisibly, so
  * everyone assumes it is broken. The alert is the feedback.
  */
 function share(discussion) {
   const url = app.forum.attribute('baseUrl') + app.route.discussion(discussion);
 
-  const done = () => app.alerts.show(
-    { type: 'success' },
-    app.translator.trans('ernestdefoe-warren.forum.row.share_copied')
-  );
+  const done = () =>
+    app.alerts.show(
+      { type: 'success' },
+      app.translator.trans('ernestdefoe-warren.forum.row.share_copied')
+    );
 
   if (navigator.clipboard) {
     navigator.clipboard.writeText(url).then(done, () => window.prompt('', url));
