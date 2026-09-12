@@ -51,12 +51,24 @@ export default function addRightRail() {
 export function widgetItems() {
   const items = new ItemList();
 
-  items.add('about', <AboutCard />, 100);
+  /*
+   * 🚨 CALLED, not rendered as <AboutCard />.
+   *
+   * Mithril treats a bare function tag as a CLOSURE component: it calls the
+   * function once and expects an object with a `view` method back. A function
+   * that returns a vnode instead hands Mithril something with no `view`, and
+   * the next redraw dies inside render.js on `undefined.apply` — which takes
+   * the whole page down, not just the rail. The discussion list spins forever
+   * and nothing in the error names this file.
+   *
+   * Either shape is fine; a plain function has to be invoked.
+   */
+  items.add('about', aboutCard(), 100);
 
   return items;
 }
 
-function AboutCard() {
+function aboutCard() {
   const forum = app.forum;
   const description = forum.attribute('description');
 
