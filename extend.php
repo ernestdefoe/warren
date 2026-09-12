@@ -21,6 +21,24 @@ use Flarum\Frontend\Document;
 use Flarum\Post\Post;
 use Flarum\Settings\SettingsRepositoryInterface;
 
+/**
+ * The column and value a vote in this direction is stored as.
+ *
+ * 🚨 Neither is a constant. The direction lives in `type` ('Up'/'Down') on a
+ * forum that has only ever run Warren and in `value` (1/-1) once
+ * fof/gamification has migrated the table -- see SharedSchema. Resolved at
+ * call time rather than at boot so the answer cannot be cached from before a
+ * migration ran.
+ *
+ * @return array{string, int|string}
+ */
+function votesOfDirection(int $direction): array
+{
+    $schema = resolve(SharedSchema::class);
+
+    return [$schema->voteColumn(), $schema->encode($direction)];
+}
+
 return [
     (new Extend\Frontend('forum'))
         ->js(__DIR__.'/js/dist/forum.js')
@@ -60,8 +78,33 @@ return [
     (new Extend\Model(Discussion::class))
         ->hasMany('warrenVotes', Vote::class, 'post_id', 'first_post_id'),
 
+    /*
+     * Three relations over the same rows, and the extra two are not
+     * convenience.
+     *
+     * 🚨 Flarum buffers relation aggregates under a key built from the
+     * COLUMN and the FUNCTION, not from the field name
+     * (EloquentBuffer::add). Two counted subqueries over one relation --
+     * upvotes and downvotes, each with its own `where` -- therefore share a
+     * single slot: the first one loads, the second reads the first one's
+     * attribute and serialises as null. It looks exactly like a field that
+     * was never registered.
+     *
+     * Naming the relations apart is what separates the slots. It is also what
+     * fof/gamification does, for what is very likely the same reason.
+     */
     (new Extend\Model(Post::class))
-        ->hasMany('warrenVotes', Vote::class, 'post_id'),
+        ->hasMany('warrenVotes', Vote::class, 'post_id')
+        ->relationship(
+            'warrenUpvotes',
+            fn (Post $post) => $post->hasMany(Vote::class, 'post_id')
+                ->where(...votesOfDirection(1))
+        )
+        ->relationship(
+            'warrenDownvotes',
+            fn (Post $post) => $post->hasMany(Vote::class, 'post_id')
+                ->where(...votesOfDirection(-1))
+        ),
 
     (new Extend\ApiResource(Resource\ForumResource::class))
         ->fields(Api\ForumResourceFields::class),

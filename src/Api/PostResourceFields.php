@@ -28,8 +28,6 @@ class PostResourceFields
 
     public function __invoke(): array
     {
-        $column = $this->schema->voteColumn();
-
         return [
             /*
              * 🚨 Two counts rather than one sum, and that is not a style
@@ -45,18 +43,19 @@ class PostResourceFields
              * Counting also costs no eager load: these are subqueries on the
              * post query itself, so a page of fifty comments is still one
              * round trip.
+             *
+             * 🚨 Each count reads its OWN relation rather than constraining a
+             * shared one. Flarum buffers aggregates under a key built from the
+             * column and the function, so two constrained counts over
+             * `warrenVotes` would share a slot and the second would serialise
+             * as null — a field that looks like it was never registered. See
+             * the relations in extend.php.
              */
             Schema\Integer::make('warrenUpvotes')
-                ->countRelation(
-                    'warrenVotes',
-                    fn ($query) => $query->where($column, $this->schema->encode(1))
-                ),
+                ->countRelation('warrenUpvotes'),
 
             Schema\Integer::make('warrenDownvotes')
-                ->countRelation(
-                    'warrenVotes',
-                    fn ($query) => $query->where($column, $this->schema->encode(-1))
-                ),
+                ->countRelation('warrenDownvotes'),
 
             /*
              * 'up', 'down', or absent.
