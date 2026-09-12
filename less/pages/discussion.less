@@ -1,27 +1,151 @@
 // ============================================================================
 // The discussion page
 //
-// A score that exists on the list and vanishes when you open the thread reads
-// as a different site, so the surfaces match even before the post gutter is
-// built.
+// A thread is one post with its replies under it. The opening post gets the
+// panel and the width; the replies sit on the ground below in a narrower
+// column, which is what makes the difference between "the post" and "what
+// people said about it" visible before a word is read.
 // ============================================================================
 
-[data-warren] .DiscussionPage-list {
+// -- The hero ---------------------------------------------------------------
+//
+// Core's hero is a full-width band with the title centred in it. The title
+// belongs at the top left of the post, reading as the start of a document
+// rather than as a banner over one, so the band is unpainted and the text
+// pulled back into the column.
+[data-warren] .DiscussionPage .Hero.DiscussionHero {
   background: transparent;
-}
-
-[data-warren] .PostStream .CommentPost .Post-body {
-  color: var(--wr-ink);
-}
-
-[data-warren] .DiscussionHero {
-  background: var(--wr-surface);
-  border: 1px solid var(--wr-line-soft);
-  border-radius: var(--wr-radius);
+  border: 0;
+  box-shadow: none;
   color: var(--wr-ink);
 }
 
 [data-warren] .DiscussionHero .container {
-  padding-top: 16px;
-  padding-bottom: 16px;
+  padding-top: 20px;
+  padding-bottom: 0;
+}
+
+[data-warren] .DiscussionHero-items {
+  text-align: left;
+}
+
+[data-warren] .DiscussionHero .DiscussionHero-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--wr-ink);
+  text-align: left;
+  text-wrap: balance;
+}
+
+[data-warren] .DiscussionHero .item-tags {
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+// -- The stream -------------------------------------------------------------
+[data-warren] .DiscussionPage-list,
+[data-warren] .PostStream {
+  background: transparent;
+}
+
+[data-warren] .PostStream-item {
+  padding: 0;
+}
+
+[data-warren] .PostStream .Post {
+  padding: 12px 0;
+  color: var(--wr-ink);
+}
+
+// A hairline between replies, matching the feed. The last one gets none: a
+// divider with nothing under it is a line drawn across the page.
+[data-warren] .PostStream-item:not(:last-child) .Post {
+  border-bottom: 1px solid var(--wr-line);
+}
+
+[data-warren] .PostStream .CommentPost .Post-body {
+  color: var(--wr-ink);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+[data-warren] .Post-header {
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: var(--wr-ink-faint);
+}
+
+[data-warren] .PostUser h3,
+[data-warren] .PostUser h3 a {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--wr-ink);
+}
+
+[data-warren] .Post-meta,
+[data-warren] .PostMeta,
+[data-warren] .Post-header .icon {
+  color: var(--wr-ink-faint);
+}
+
+// Post controls, as the same pills the feed uses.
+[data-warren] .Post-actions > li > .Button,
+[data-warren] .Post-controls > li > .Button {
+  height: var(--wr-pill-h);
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--wr-radius-pill);
+  background: transparent;
+  color: var(--wr-ink-faint);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+[data-warren] .Post-actions > li > .Button:hover,
+[data-warren] .Post-controls > li > .Button:hover {
+  background: var(--wr-pill);
+  color: var(--wr-ink);
+}
+
+// Images inside a post, held to the column and given the same corners as
+// everything else. Without a max-height one portrait photo turns a thread into
+// a scroll.
+[data-warren] .Post-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--wr-radius-sm);
+}
+
+// Code and quotes, on the panel colour rather than on core's.
+[data-warren] .Post-body pre,
+[data-warren] .Post-body code {
+  background: var(--wr-surface);
+  color: var(--wr-ink);
+  border-radius: var(--wr-radius-sm);
+}
+
+[data-warren] .Post-body blockquote {
+  border-left: 3px solid var(--wr-line-strong);
+  color: var(--wr-ink-dim);
+}
+
+// -- The reply box ----------------------------------------------------------
+[data-warren] .DiscussionPage .Composer {
+  background: var(--wr-surface);
+  border-radius: var(--wr-radius) var(--wr-radius) 0 0;
+}
+
+[data-warren] .Composer .Button--primary {
+  border-radius: var(--wr-radius-pill);
+  background: var(--wr-accent);
+  color: var(--wr-accent-ink);
+  font-weight: 700;
+  border: 0;
+}
+
+// The scrubber down the right of a thread.
+[data-warren] .PostStreamScrubber-scrollbar {
+  color: var(--wr-ink-faint);
 }

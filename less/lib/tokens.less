@@ -43,10 +43,6 @@
   // three unrelated buttons.
   --wr-pill-h:        32px;
 
-  // Warren draws its own byline, so core's fixed avatar column would only add
-  // dead space down the left of every row.
-  --avatar-column-width: 0px;
-
   --container-hd:     1408px;
   --container-xl:     1408px;
   --container-xxl:    1408px;
@@ -118,6 +114,20 @@
 // then take a stronger text colour so the two do not fight.
 [data-theme='light-hc'] { --wr-ink: #000; --wr-ink-dim: #333; --wr-line: #000; }
 [data-theme='dark-hc']  { --wr-ink: #fff; --wr-ink-dim: #ddd; --wr-line: #fff; }
+
+/*
+ * 🚨 Scoped to the LIST, never set at :root.
+ *
+ * Warren draws its own byline, so core's fixed avatar column would be dead
+ * space down the left of every row — but the same variable drives the avatar
+ * gutter in the POST STREAM, where the avatar is still there. Zeroing it
+ * globally pulled every post body left underneath its own author picture, so
+ * the first line of every post was drawn through the avatar. It looked like a
+ * broken post renderer and it was one declaration in the wrong place.
+ */
+[data-warren] .DiscussionList {
+  --avatar-column-width: 0px;
+}
 
 // The forum's own ground. Without an explicit background here the page keeps
 // whatever core painted and every panel above floats on the wrong colour.
