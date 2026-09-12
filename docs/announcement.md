@@ -1,3 +1,13 @@
+<!--
+  discuss.flarum.org tags:
+    primary   — Extension
+    secondary — Themes, 2.x
+
+  "(Built using AI)" stays in the title: it is required on a new extension
+  thread there. A later RELEASE is a reply to this topic, never an edit of the
+  opening post.
+-->
+
 # Warren — a Reddit-inspired theme for Flarum 2 (Built using AI)
 
 Somebody asked for a Reddit-inspired theme, so here is one.
