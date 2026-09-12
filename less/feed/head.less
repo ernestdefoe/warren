@@ -1,0 +1,40 @@
+// ============================================================================
+// The sort bar
+//
+// The index toolbar carries real controls (sort, mark-all-read, refresh), and
+// a feed that quietly drops the sort control is a feed whose readers cannot
+// find their own discussions. It is restyled, never hidden.
+// ============================================================================
+
+[data-warren] .IndexPage-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  padding: 6px 8px;
+  background: var(--wr-surface);
+  border: 1px solid var(--wr-line-soft);
+  border-radius: var(--wr-radius);
+}
+
+[data-warren] .IndexPage-toolbar-view,
+[data-warren] .IndexPage-toolbar-action {
+  float: none;
+  margin: 0;
+}
+
+[data-warren] .IndexPage-toolbar-action {
+  margin-left: auto;
+}
+
+[data-warren] .IndexPage-toolbar .Button {
+  border-radius: var(--wr-radius-pill);
+  background: transparent;
+  color: var(--wr-ink-dim);
+  font-weight: 600;
+}
+
+[data-warren] .IndexPage-toolbar .Button:hover {
+  background: var(--wr-hover);
+  color: var(--wr-ink);
+}

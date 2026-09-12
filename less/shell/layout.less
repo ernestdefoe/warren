@@ -1,0 +1,75 @@
+// ============================================================================
+// The three-column shell
+//
+// Core's PageStructure already renders a two-column flex container and drives
+// both widths from CSS variables (`--sidebar-width`, `--content-width`,
+// `--gap`) that a theme is expected to retune. Warren retunes them and adds a
+// third child from JS. Nothing here replaces core's layout.
+// ============================================================================
+
+.App--index .Page-container,
+.App--index .Page-main {
+  --gap: var(--wr-gap);
+}
+
+.App--index {
+  .Page-sidebar {
+    --sidebar-width: var(--wr-rail-left);
+    margin-top: 0;
+  }
+
+  .Page-content {
+    // Fixed rather than fluid: the point of the layout is a column of a known,
+    // readable width, with the rails absorbing the slack.
+    width: var(--wr-feed-width);
+    flex: 0 0 var(--wr-feed-width);
+    min-width: 0;
+    margin-top: 0;
+  }
+
+  .Page-container {
+    align-items: flex-start;
+    justify-content: center;
+  }
+}
+
+.Warren-rail {
+  width: var(--wr-rail-right);
+  flex: 0 0 var(--wr-rail-right);
+  min-width: 0;
+  position: sticky;
+  // Clear the fixed header so a sticky rail does not slide under it.
+  top: calc(var(--header-height) + 16px);
+  align-self: flex-start;
+}
+
+/*
+ * The left rail stays put while the feed scrolls.
+ *
+ * 🚨 Sticky has to be on .Page-sidebar, NOT on .IndexPage-nav inside it.
+ * `.Page-container` sets `align-items: flex-start`, which shrinks every flex
+ * item to its own content height — so the sidebar is exactly as tall as the
+ * nav and a sticky child has no room to travel inside it. The rule applies,
+ * the element never sticks, and the rail scrolls away like any other block. It
+ * looks exactly like sticky simply not working.
+ *
+ * 🚨 And no max-height, no overflow. Per spec a non-visible value on one axis
+ * forces the other from `visible` to `auto`, so a rail capped with
+ * `overflow-y` silently becomes a clipping container on BOTH axes — and this
+ * rail holds dropdowns, which open outside it.
+ */
+.App--index .Page-sidebar {
+  position: sticky;
+  top: calc(var(--header-height) + 16px);
+  align-self: flex-start;
+}
+
+.App--index .IndexPage-nav {
+  position: static;
+}
+
+// Core draws a vertical rule right of the side nav. Warren separates its
+// columns with whitespace, so the rule is one line too many.
+.App--index .sideNav:after {
+  display: none;
+}

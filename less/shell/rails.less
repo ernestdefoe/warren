@@ -1,0 +1,49 @@
+// ============================================================================
+// Rail furniture
+// ============================================================================
+
+.Warren-card {
+  margin-bottom: 16px;
+  background: var(--wr-surface);
+  border: 1px solid var(--wr-line-soft);
+  border-radius: var(--wr-radius);
+  overflow: hidden;
+}
+
+.Warren-card-head {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--wr-line-soft);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--wr-ink-dim);
+}
+
+.Warren-card-body {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--wr-ink-dim);
+}
+
+.Warren-card-body p {
+  margin: 0 0 8px;
+}
+
+.Warren-card-stat {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.Warren-card-stat span:last-child {
+  color: var(--wr-ink);
+  font-weight: 600;
+}
+
+// The left nav, restyled into pills.
+[data-warren] .App--index .sideNav .Dropdown-toggle,
+[data-warren] .App--index .sideNav li > a {
+  border-radius: var(--wr-radius-pill);
+}

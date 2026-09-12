@@ -17,12 +17,31 @@ use Flarum\Api\Resource;
 use Flarum\Api\Sort\SortColumn;
 use Flarum\Discussion\Discussion;
 use Flarum\Extend;
+use Flarum\Frontend\Document;
 use Flarum\Post\Post;
+use Flarum\Settings\SettingsRepositoryInterface;
 
 return [
     (new Extend\Frontend('forum'))
         ->js(__DIR__.'/js/dist/forum.js')
-        ->css(__DIR__.'/less/forum.less'),
+        ->css(__DIR__.'/less/forum.less')
+        /*
+         * Stamped on <html> by the server, not set from JS on first draw.
+         *
+         * Every colour and every width in the stylesheet hangs off this
+         * attribute. Applying it after the bundle boots means the first paint
+         * is unstyled and the page visibly reflows — the flash a theme is
+         * judged by, on the one load where a reader has nothing else to look
+         * at.
+         */
+        ->content(function (Document $document) {
+            $density = resolve(SettingsRepositoryInterface::class)
+                ->get('warren.density', 'card');
+
+            $document->extraAttributes['data-warren'] = in_array($density, ['card', 'compact'], true)
+                ? $density
+                : 'card';
+        }),
 
     (new Extend\Frontend('admin'))
         ->js(__DIR__.'/js/dist/admin.js')
@@ -43,6 +62,9 @@ return [
 
     (new Extend\Model(Post::class))
         ->hasMany('warrenVotes', Vote::class, 'post_id'),
+
+    (new Extend\ApiResource(Resource\ForumResource::class))
+        ->fields(Api\ForumResourceFields::class),
 
     (new Extend\ApiResource(Resource\DiscussionResource::class))
         ->fields(Api\DiscussionResourceFields::class)

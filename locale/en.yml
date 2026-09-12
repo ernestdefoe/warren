@@ -1,16 +1,16 @@
 ernestdefoe-warren:
-
-  # Strings under `forum.` load on the forum frontend only, `admin.` on the
-  # admin frontend only, and `lib.`/`ref.` on both. Nothing in Warren is
-  # hardcoded English in a component — every visible string lives here so a
-  # translator can reach it.
-
   forum:
     vote:
       up: Upvote
       down: Downvote
-      score: "{count, plural, one {# point} other {# points}}"
+    row:
+      comments: "{count, plural, one {# comment} other {# comments}}"
 
   admin:
     settings:
       title: Warren
+      density_label: Row density
+      density_card: Card — roomy rows on a tinted ground
+      density_compact: Compact — the classic dense list
+      allow_self_votes_label: Let people vote on their own posts
+      allow_self_votes_help: On by default, matching fof/gamification. Turn it off if you treat a self-upvote as score inflation.

@@ -1,0 +1,27 @@
+// ============================================================================
+// The discussion page
+//
+// A score that exists on the list and vanishes when you open the thread reads
+// as a different site, so the surfaces match even before the post gutter is
+// built.
+// ============================================================================
+
+[data-warren] .DiscussionPage-list {
+  background: transparent;
+}
+
+[data-warren] .PostStream .CommentPost .Post-body {
+  color: var(--wr-ink);
+}
+
+[data-warren] .DiscussionHero {
+  background: var(--wr-surface);
+  border: 1px solid var(--wr-line-soft);
+  border-radius: var(--wr-radius);
+  color: var(--wr-ink);
+}
+
+[data-warren] .DiscussionHero .container {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}

@@ -1,0 +1,260 @@
+// ============================================================================
+// The feed row
+//
+// Core builds DiscussionListItem from ItemLists, so Warren adds to it rather
+// than replacing it:
+//
+//   .DiscussionListItem
+//     .DiscussionListItem-content          <- the card
+//       .Warren-gutter                     (new)  arrows + score
+//       .Warren-main                       (new)
+//         .Warren-byline                   (new)  tag, author, time
+//         .DiscussionListItem-title
+//         .DiscussionListItem-info         core terminal post + flarum/tags
+//         .Warren-actions                  (new)  comments, share
+//     .DiscussionListItem-controls         the ... menu
+//
+// Keeping core items in place is what lets flarum/tags, fof/best-answer,
+// sticky, locked and every other list decorator keep working untouched.
+// ============================================================================
+
+/*
+ * Undo the tablet-up bleed.
+ *
+ * At @tablet-up core pulls the row 15px outside its own box on both sides,
+ * pads it back, and tints it on hover. In a card layout that paints the hover
+ * tint AROUND the card and puts the ... control outside its right edge. The
+ * card is the surface here, so all of it goes.
+ *
+ * The attribute selector adds specificity over the core rule without reaching
+ * for !important.
+ */
+[data-warren] .DiscussionListItem {
+  position: relative;
+  margin: 0 0 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  transition: none;
+}
+
+[data-warren] .DiscussionListItem:hover {
+  background: transparent;
+}
+
+// -- The card ---------------------------------------------------------------
+[data-warren] .DiscussionListItem-content {
+  display: grid;
+  // The gutter is a fixed column and the rest takes what is left.
+  // `minmax(0, 1fr)` rather than `1fr`: a grid child defaults to a min-width of
+  // `auto`, so one long unbroken title would push the row wider than the feed
+  // instead of wrapping inside it.
+  grid-template-columns: var(--wr-gutter) minmax(0, 1fr);
+  gap: 0 8px;
+  align-items: start;
+  padding: var(--wr-row-pad);
+
+  background: var(--wr-surface);
+  border: 1px solid var(--wr-line-soft);
+  border-radius: var(--wr-radius);
+  color: var(--wr-ink);
+  overflow: hidden;
+}
+
+[data-warren] .DiscussionListItem-content:hover {
+  border-color: var(--wr-line);
+}
+
+/*
+ * Nothing is re-parented to build the two columns.
+ *
+ * The gutter spans every row of column one and everything core renders falls
+ * into column two. Lifting core's items into a wrapper of Warren's own would
+ * have been the obvious way to get the same picture, and it would break every
+ * other extension that walks the DOM for `.DiscussionListItem-main`.
+ */
+[data-warren] .DiscussionListItem-content > .Warren-gutter {
+  grid-column: 1;
+  grid-row: 1 / -1;
+}
+
+[data-warren] .DiscussionListItem-content > *:not(.Warren-gutter) {
+  grid-column: 2;
+  // A grid child's default min-width is `auto`, so without this one long
+  // unbroken word in a title widens the whole row instead of wrapping.
+  min-width: 0;
+}
+
+// -- The vote gutter --------------------------------------------------------
+.Warren-gutter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: var(--wr-gutter-bg);
+}
+
+.Warren-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // Touch target around a small glyph. The mobile rules widen the target
+  // rather than the arrow.
+  width: 32px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--wr-radius-sm);
+  background: transparent;
+  color: var(--wr-ink-faint);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.Warren-arrow:hover {
+  background: var(--wr-hover);
+  color: var(--wr-ink-dim);
+}
+
+.Warren-arrow:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.Warren-arrow:disabled:hover {
+  background: transparent;
+  color: var(--wr-ink-faint);
+}
+
+.Warren-arrow .icon {
+  font-size: 14px;
+}
+
+.Warren-arrow--up.Warren-arrow--active,
+.Warren-arrow--up.Warren-arrow--active:hover {
+  color: var(--wr-up);
+}
+
+.Warren-arrow--down.Warren-arrow--active,
+.Warren-arrow--down.Warren-arrow--active:hover {
+  color: var(--wr-down);
+}
+
+.Warren-score {
+  font-size: 12px;
+  font-weight: 700;
+  // Digits in a fixed column that redraws on every vote. Without this the
+  // score visibly jitters as 9 becomes 10.
+  font-variant-numeric: tabular-nums;
+  color: var(--wr-ink);
+}
+
+.Warren-score--up   { color: var(--wr-up); }
+.Warren-score--down { color: var(--wr-down); }
+
+/*
+ * Core's author column, reduced to its badges.
+ *
+ * The item itself stays in the list — it carries sticky, locked and whatever
+ * other extensions add — so only the picture goes, and Warren's byline
+ * supplies a smaller one in a line of text where it belongs.
+ */
+[data-warren] .DiscussionListItem-author-avatar,
+[data-warren] .DiscussionListItem-author .Avatar {
+  display: none;
+}
+
+[data-warren] .DiscussionListItem-author {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+// -- The body ---------------------------------------------------------------
+.Warren-byline {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: var(--wr-ink-dim);
+}
+
+.Warren-byline .Avatar {
+  width: var(--wr-avatar);
+  height: var(--wr-avatar);
+  font-size: 10px;
+  line-height: var(--wr-avatar);
+}
+
+.Warren-byline-tag {
+  font-weight: 700;
+  color: var(--wr-ink);
+}
+
+.Warren-byline-sep {
+  color: var(--wr-ink-faint);
+}
+
+[data-warren] .DiscussionListItem-title {
+  display: block;
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--wr-ink);
+  // A title is the one place a ragged last word reads as sloppy.
+  text-wrap: balance;
+}
+
+[data-warren] .DiscussionListItem-info {
+  margin: 0;
+  font-size: 12px;
+  color: var(--wr-ink-dim);
+}
+
+// The stats bubble duplicates the comment count in the action bar, in a shape
+// that belongs to a different layout.
+[data-warren] .DiscussionListItem-stats {
+  display: none;
+}
+
+// -- The action bar ---------------------------------------------------------
+.Warren-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.Warren-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--wr-radius-pill);
+  background: transparent;
+  color: var(--wr-ink-dim);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.Warren-action:hover {
+  background: var(--wr-hover);
+  color: var(--wr-ink);
+}
+
+.Warren-action .icon {
+  font-size: 13px;
+}
+
+// The ... menu, back inside the card.
+[data-warren] .DiscussionListItem-controls {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}

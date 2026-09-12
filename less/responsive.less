@@ -1,0 +1,72 @@
+// ============================================================================
+// Phones and tablets
+//
+// Imported LAST. An unconditional rule that appears AFTER a media-query rule
+// of equal specificity wins even inside the query, so every responsive
+// override has to come after the base rule it is meant to beat.
+// ============================================================================
+
+@media (max-width: 991px) {
+  /*
+   * 🚨 `align-self: stretch`, and it has to be on the item.
+   *
+   * A container `align-items` loses to any `align-self` already set on the
+   * child, and core sets `align-self: flex-start` on the sidebar. In a column
+   * flex container flex-start sizes it to its CONTENT, which is how a rail
+   * ended up 1842px wide inside a 768px page in Cascade. Naming both is not
+   * redundant.
+   */
+  .App--index .Page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .App--index .Page-sidebar,
+  .App--index .Page-content,
+  .Warren-rail {
+    width: auto;
+    flex: 0 0 auto;
+    min-width: 0;
+    align-self: stretch;
+    position: static;
+  }
+
+  /*
+   * The feed comes first and the rails follow it. A phone that opens on a
+   * column of navigation nobody asked for has buried the thing they came for
+   * below the fold.
+   */
+  .App--index .Page-content { order: 0; }
+  .App--index .Page-sidebar { order: 1; }
+  .Warren-rail              { order: 2; }
+}
+
+@media (max-width: 767px) {
+  // Touch targets. 44px is the floor, and the gutter grows rather than the
+  // glyph: a bigger arrow would unbalance the row, a bigger target is
+  // invisible until a thumb needs it.
+  :root {
+    --wr-gutter: 44px;
+  }
+
+  .Warren-arrow {
+    width: 44px;
+    height: 36px;
+  }
+
+  .Warren-action {
+    height: 36px;
+    min-height: 36px;
+  }
+
+  [data-warren] .DiscussionListItem-content {
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+
+  [data-warren] .DiscussionListItem {
+    margin-bottom: 0;
+  }
+}

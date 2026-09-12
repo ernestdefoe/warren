@@ -1,8 +1,21 @@
 // ============================================================================
-// Warren — a Reddit-inspired theme for Flarum 2.
+// Warren - a Reddit-inspired theme for Flarum 2.
 //
-// Import order is load-bearing: anything that hides or re-stacks an element at
-// a breakpoint belongs in responsive.less, imported LAST, because an
-// unconditional rule appearing after a media-query rule of equal specificity
-// wins even inside the query.
+// Import order is load-bearing. responsive.less is LAST because an
+// unconditional rule of equal specificity beats a media-query rule that came
+// before it, even inside the query.
+//
+// Verified against flarum/core v2.0.0-rc.8.
 // ============================================================================
+
+@import 'lib/tokens.less';
+
+@import 'shell/layout.less';
+@import 'shell/rails.less';
+
+@import 'feed/head.less';
+@import 'feed/row.less';
+
+@import 'pages/discussion.less';
+
+@import 'responsive.less';
