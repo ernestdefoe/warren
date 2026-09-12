@@ -40,6 +40,13 @@ export default function addSortOptions() {
 
     if (map.relevance !== undefined) rebuilt.relevance = map.relevance;
 
+    /*
+     * 🚨 Identical to the server's default sort, tie-break included.
+     *
+     * The dropdown shows the FIRST key's label whenever no sort is in the URL,
+     * so if these two strings differ the control says Hot while the list is
+     * ordered by something else — a caption that lies about what is on screen.
+     */
     rebuilt.hot = { sort: hot, label: app.translator.trans('ernestdefoe-warren.forum.sort.hot') };
     rebuilt.latest = map.latest;
     rebuilt.newest = map.newest;

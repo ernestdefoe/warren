@@ -91,7 +91,7 @@ class ForumResourceFields
              * would simply fail to load.
              */
             Schema\Str::make('warrenHotSort')
-                ->get(fn (): string => '-'.$this->schema->rankColumn()),
+                ->get(fn (): string => '-'.$this->schema->rankColumn().',-createdAt'),
 
             Schema\Str::make('warrenTopSort')
                 ->get(fn (): string => '-votes'),

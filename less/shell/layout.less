@@ -98,6 +98,33 @@
 }
 
 /*
+ * The feed takes the space back.
+ *
+ * Hiding the rail without this just moves the same column left and leaves a
+ * 272px hole on the right, which reads as a broken layout rather than as a
+ * deliberate one — the reader asked for room and got whitespace.
+ *
+ * The width is reclaimed rather than set to a second magic number, so the two
+ * states cannot drift apart when the feed width is retuned.
+ */
+[data-warren-sidebar='collapsed'] .App--index .Page-content {
+  width: calc(var(--wr-feed-width) + var(--wr-rail-left) + var(--wr-gap));
+  flex-basis: calc(var(--wr-feed-width) + var(--wr-rail-left) + var(--wr-gap));
+}
+
+// Both states animate, so the rail folding away reads as one movement rather
+// than as the page jumping.
+.App--index .Page-content {
+  transition: width 0.15s ease, flex-basis 0.15s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .App--index .Page-content {
+    transition: none;
+  }
+}
+
+/*
  * The toggle: a round button centred ON the rule, at the head of the feed.
  *
  * 🚨 Positioned against `.Page-content`, which is why that column is the one

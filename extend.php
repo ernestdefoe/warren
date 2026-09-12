@@ -84,7 +84,32 @@ return [
              * column-narrowed, because that argument holds until the day
              * somebody else has a reason to.
              */
+            $rank = resolve(SharedSchema::class)->rankColumn();
+
             return $endpoint
+                /*
+                 * 🚨 Hot is the default, and it needs a TIE-BREAK to be an
+                 * ordering at all.
+                 *
+                 * The ranking is reddit's, and reddit's returns exactly 0 for
+                 * every discussion with a score of 0 — the sign term zeroes
+                 * the time term. On a forum that has not been voted on yet
+                 * that is EVERY discussion, so sorting on the column alone
+                 * hands back rows in whatever order the database felt like.
+                 * The front page of a new install would look shuffled.
+                 *
+                 * `-createdAt` after it costs nothing once scores exist and
+                 * makes the empty case read as newest-first, which is what a
+                 * forum with no votes should look like.
+                 *
+                 * Fixing this in the arithmetic instead — seeding zero-score
+                 * rows with their age — was the other option and it is the
+                 * wrong one: the column is shared, and an extension that
+                 * writes a different number than its neighbour for the same
+                 * row is how a front page reorders itself depending on who
+                 * touched it last.
+                 */
+                ->defaultSort('-'.$rank.',-createdAt')
                 /*
                  * 🚨 The WHOLE post, never a column subset.
                  *
