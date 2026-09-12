@@ -84,7 +84,24 @@ return [
              * column-narrowed, because that argument holds until the day
              * somebody else has a reason to.
              */
-            return $endpoint->eagerLoadWhere('warrenVotes', function ($query, Context $context) {
+            return $endpoint
+                /*
+                 * 🚨 The WHOLE post, never a column subset.
+                 *
+                 * The preview needs `parsed_content`, and the obvious saving
+                 * is to select only that. It is the wrong saving: this eager
+                 * load is SHARED, so the moment any other extension includes
+                 * `firstPost` on the discussion index, those posts are
+                 * serialised from the models Warren narrowed and reach the
+                 * browser with a null `createdAt`. Flarum's store keeps the
+                 * half-loaded Post, and core's PostStream dereferences that
+                 * date without a guard — every discussion page then renders
+                 * blank. That is a real bug, reported against Cascade, and
+                 * impossible to reproduce without the other extension
+                 * present, which is what made it look like somebody else's.
+                 */
+                ->eagerLoad('firstPost')
+                ->eagerLoadWhere('warrenVotes', function ($query, Context $context) {
                 // A guest has no votes to find. Coercing to 0 rather than
                 // skipping keeps the relation MARKED loaded, which is what
                 // tells the field the difference between "no vote" and "never

@@ -10,11 +10,13 @@ use ErnestDefoe\Warren\SharedSchema;
 use Flarum\Api\Context;
 use Flarum\Api\Schema;
 use Flarum\Discussion\Discussion;
+use Flarum\Post\CommentPost;
+use s9e\TextFormatter\Utils;
 
 /**
- * The score, the ranking and this reader's own vote.
+ * The score, the ranking, this reader's own vote, and the post preview.
  *
- * 🚨 These are READ-ONLY and they are registered unconditionally, including on
+ * 🚨 The vote fields are READ-ONLY and registered unconditionally, including on
  * a forum running fof/gamification.
  *
  * That is safe precisely because the schema is shared: `discussions.votes` and
@@ -25,11 +27,14 @@ use Flarum\Discussion\Discussion;
  * would actually conflict.
  *
  * Reading unconditionally is what lets the row layout be the same code on both
- * kinds of forum. A gutter that only knew how to read its own extension's
+ * kinds of forum. A control that only knew how to read its own extension's
  * field would need two renderers and they would drift.
  */
 class DiscussionResourceFields
 {
+    /** Roughly three lines at the feed's width, which is where the fade sits. */
+    private const EXCERPT_LENGTH = 220;
+
     public function __construct(
         protected SharedSchema $schema
     ) {
@@ -74,34 +79,55 @@ class DiscussionResourceFields
             Schema\Str::make('warrenUserVote')
                 ->visible(fn (Discussion $discussion, Context $context) => $context->getActor()->exists)
                 ->get(fn (Discussion $discussion): ?string => $this->loadedVote($discussion)),
+
+            /*
+             * The opening post's first image, shown full width under the title.
+             *
+             * One image, not a gallery. A post with four pictures in it is
+             * still one post in a feed, and a row that tiles them is a
+             * different layout — this one gives the first picture the width
+             * and lets the thread carry the rest.
+             */
+            Schema\Str::make('warrenImage')
+                ->visible(fn (Discussion $discussion, Context $context) => $this->canPreview($discussion, $context))
+                ->get(fn (Discussion $discussion): ?string => $this->firstImage($discussion)),
+
+            /*
+             * The opening post as plain text, for posts with no picture.
+             *
+             * Stripped of formatting rather than rendered: an excerpt is a
+             * hint, and letting post markup into a list row means one bad
+             * paste can restyle the page around it.
+             */
+            Schema\Str::make('warrenExcerpt')
+                ->visible(fn (Discussion $discussion, Context $context) => $this->canPreview($discussion, $context))
+                ->get(fn (Discussion $discussion): ?string => $this->excerpt($discussion)),
         ];
     }
 
     /**
      * This actor's vote, read from the relation the index endpoint eager-loaded.
      *
-     * 🚨 No query here, on purpose. A gutter renders on every row, so a lookup
-     * per discussion is an N+1 on every page of the forum — twenty extra
-     * queries to draw twenty arrows. `extend.php` eager-loads `warrenVotes`
-     * already constrained to this actor, so by the time a field is serialised
-     * the answer is in memory.
+     * 🚨 No query here, on purpose. A vote control renders on every row, so a
+     * lookup per discussion is an N+1 on every page of the forum — twenty
+     * extra queries to draw twenty arrows. `extend.php` eager-loads
+     * `warrenVotes` already constrained to this actor, so by the time a field
+     * is serialised the answer is in memory.
      *
      * The relation hangs off the discussion's own `first_post_id` rather than
-     * off a loaded `firstPost`, which is why the whole thing costs ONE query
-     * and never drags twenty post bodies across just to find out which way an
-     * arrow points.
+     * off a loaded `firstPost`, which is why the vote costs ONE query even on
+     * an endpoint carrying no posts at all.
      *
      * It is constrained by ROW (`where user_id`), never by column. Narrowing
      * the columns of a relation other code can ask for is what put a null
-     * `createdAt` into Flarum's store and blanked discussion pages in Cascade —
-     * see that extension's eager-load comment. A relation Warren defines under
-     * its own name cannot collide that way, and it still must not be
-     * column-narrowed.
+     * `createdAt` into Flarum's store and blanked discussion pages in Cascade.
+     * A relation Warren defines under its own name cannot collide that way,
+     * and it still must not be column-narrowed.
      *
      * Returns null when the relation was never loaded — an endpoint Warren did
      * not extend, or a model built in a console command. "I don't know" is the
-     * honest answer there, and it renders as an un-voted gutter rather than as
-     * a lie about what this reader did.
+     * honest answer there, and it renders as an un-voted control rather than
+     * as a lie about what this reader did.
      */
     protected function loadedVote(Discussion $discussion): ?string
     {
@@ -116,5 +142,140 @@ class DiscussionResourceFields
         }
 
         return $vote->direction() > 0 ? 'up' : 'down';
+    }
+
+    /**
+     * Only on a listing, and only when the post is already in memory.
+     *
+     * 🚨 `relationLoaded` is checked rather than the relation simply read. If
+     * the eager load in extend.php ever stops matching — a renamed endpoint,
+     * another extension replacing the index query — touching
+     * `$discussion->firstPost` would lazily fire one query PER ROW. Returning
+     * nothing instead degrades the feed to a title-only list: visibly poorer,
+     * but not twenty queries a page in production.
+     */
+    protected function canPreview(Discussion $discussion, Context $context): bool
+    {
+        return $context->listing() && $discussion->relationLoaded('firstPost');
+    }
+
+    protected function firstPostXml(Discussion $discussion): ?string
+    {
+        if (! $discussion->relationLoaded('firstPost')) {
+            return null;
+        }
+
+        $post = $discussion->getRelation('firstPost');
+
+        if (! $post instanceof CommentPost) {
+            return null;
+        }
+
+        $xml = $post->parsed_content;
+
+        return is_string($xml) && $xml !== '' ? $xml : null;
+    }
+
+    protected function firstImage(Discussion $discussion): ?string
+    {
+        $xml = $this->firstPostXml($discussion);
+
+        if ($xml === null) {
+            return null;
+        }
+
+        /*
+         * Attachments first, and if there are any, ONLY attachments.
+         *
+         * An uploaded image is deliberate media — somebody attached a photo or
+         * a screenshot. An inline markdown image very often is not: a release
+         * announcement is one cover image followed by a row of shields.io
+         * badges, and a feed that leads with a build badge looks broken rather
+         * than illustrated.
+         */
+        $candidates = array_merge(
+            Utils::getAttributeValues($xml, 'UPL-IMAGE-PREVIEW', 'thumbnail_url'),
+            Utils::getAttributeValues($xml, 'UPL-IMAGE-PREVIEW', 'url')
+        );
+
+        if ($candidates === []) {
+            $candidates = array_filter(
+                Utils::getAttributeValues($xml, 'IMG', 'src'),
+                fn ($url) => is_string($url) && ! $this->isBadge($url)
+            );
+        }
+
+        foreach ($candidates as $url) {
+            if (is_string($url) && $this->isSafeUrl($url)) {
+                return $url;
+            }
+        }
+
+        return null;
+    }
+
+    protected function excerpt(Discussion $discussion): ?string
+    {
+        $xml = $this->firstPostXml($discussion);
+
+        if ($xml === null) {
+            return null;
+        }
+
+        // Attachment markup carries filenames and sizes, which read as noise
+        // in a sentence of prose.
+        foreach (['UPL-IMAGE-PREVIEW', 'UPL-FILE'] as $tag) {
+            $xml = Utils::removeTag($xml, $tag);
+        }
+
+        $text = trim(preg_replace('/\s+/u', ' ', Utils::removeFormatting($xml)) ?? '');
+
+        if ($text === '') {
+            return null;
+        }
+
+        if (mb_strlen($text) <= self::EXCERPT_LENGTH) {
+            return $text;
+        }
+
+        $cut = mb_substr($text, 0, self::EXCERPT_LENGTH);
+        $lastSpace = mb_strrpos($cut, ' ');
+
+        // Guard against one very long token — a URL, a CJK run with no spaces
+        // — collapsing the excerpt to almost nothing.
+        if ($lastSpace !== false && $lastSpace > self::EXCERPT_LENGTH * 0.6) {
+            $cut = mb_substr($cut, 0, $lastSpace);
+        }
+
+        return rtrim($cut).'…';
+    }
+
+    /**
+     * 🚨 Only http(s) and site-relative URLs reach the browser as an `src`.
+     *
+     * The value comes out of post content, which is written by members. A
+     * `javascript:` or `data:` URL in an img src is the oldest trick there is,
+     * and a feed would render it on the busiest page of the forum.
+     */
+    protected function isSafeUrl(string $url): bool
+    {
+        if ($url === '') {
+            return false;
+        }
+
+        if (str_starts_with($url, '/') && ! str_starts_with($url, '//')) {
+            return true;
+        }
+
+        return (bool) preg_match('#^https?://#i', $url);
+    }
+
+    /** Shields, badges and other furniture that is never the subject. */
+    protected function isBadge(string $url): bool
+    {
+        return (bool) preg_match(
+            '#(shields\.io|badgen\.net|badge\.fury\.io|travis-ci|circleci\.com|/badge/)#i',
+            $url
+        );
     }
 }

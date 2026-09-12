@@ -38,6 +38,11 @@ export default function decorateRow() {
     const discussion = this.attrs.discussion;
 
     items.add('warrenByline', bylineView(discussion), 110);
+
+    const preview = previewView(discussion);
+
+    if (preview) items.add('warrenPreview', preview, 70);
+
     items.add('warrenActions', actionsView(discussion), 60);
 
     /*
@@ -119,6 +124,46 @@ function bylineView(discussion) {
       ) : null}
     </div>
   );
+}
+
+/**
+ * The picture, or the first couple of lines, or nothing.
+ *
+ * A post with an image leads with it; a post without one shows the opening
+ * words. Never both: a row carrying a picture AND three lines of prose is
+ * taller than two rows that each carry one, and a feed is a list before it is
+ * a gallery.
+ */
+function previewView(discussion) {
+  const image = discussion.warrenImage && discussion.warrenImage();
+
+  if (image) {
+    return (
+      <Link className="Warren-media" href={app.route.discussion(discussion)}>
+        {/*
+          * 🚨 loading="lazy" and an empty alt.
+          *
+          * Lazy because a feed of twenty posts is twenty full-size images the
+          * reader has not scrolled to yet. Empty alt because the link around
+          * it is already labelled by the title directly above - a screen
+          * reader announcing the filename here would read the post twice.
+          */}
+        <img src={image} alt="" loading="lazy" />
+      </Link>
+    );
+  }
+
+  const excerpt = discussion.warrenExcerpt && discussion.warrenExcerpt();
+
+  if (excerpt) {
+    return (
+      <Link className="Warren-excerpt" href={app.route.discussion(discussion)}>
+        {excerpt}
+      </Link>
+    );
+  }
+
+  return null;
 }
 
 function actionsView(discussion) {

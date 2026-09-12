@@ -10,6 +10,10 @@ ernestdefoe-warren:
       share: Share
       share_copied: Link copied.
 
+    sidebar:
+      collapse: Collapse the sidebar
+      expand: Show the sidebar
+
     rail:
       about: About this community
       members: Members

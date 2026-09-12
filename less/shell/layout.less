@@ -2,9 +2,9 @@
 // The three-column shell
 //
 // Core's PageStructure already renders a two-column flex container and drives
-// both widths from CSS variables (`--sidebar-width`, `--content-width`,
-// `--gap`) that a theme is expected to retune. Warren retunes them and adds a
-// third child from JS. Nothing here replaces core's layout.
+// both widths from CSS variables (--sidebar-width, --content-width, --gap)
+// that a theme is expected to retune. Warren retunes them and adds a third
+// child from JS. Nothing here replaces core's layout.
 // ============================================================================
 
 .App--index .Page-container,
@@ -47,16 +47,16 @@
  * The left rail stays put while the feed scrolls.
  *
  * 🚨 Sticky has to be on .Page-sidebar, NOT on .IndexPage-nav inside it.
- * `.Page-container` sets `align-items: flex-start`, which shrinks every flex
- * item to its own content height — so the sidebar is exactly as tall as the
+ * .Page-container sets `align-items: flex-start`, which shrinks every flex
+ * item to its own content height - so the sidebar is exactly as tall as the
  * nav and a sticky child has no room to travel inside it. The rule applies,
  * the element never sticks, and the rail scrolls away like any other block. It
  * looks exactly like sticky simply not working.
  *
  * 🚨 And no max-height, no overflow. Per spec a non-visible value on one axis
- * forces the other from `visible` to `auto`, so a rail capped with
- * `overflow-y` silently becomes a clipping container on BOTH axes — and this
- * rail holds dropdowns, which open outside it.
+ * forces the other from `visible` to `auto`, so a rail capped with overflow-y
+ * silently becomes a clipping container on BOTH axes - and this rail holds
+ * dropdowns, which open outside it.
  */
 .App--index .Page-sidebar {
   position: sticky;
@@ -72,4 +72,39 @@
 // columns with whitespace, so the rule is one line too many.
 .App--index .sideNav:after {
   display: none;
+}
+
+// -- The collapsed rail ------------------------------------------------------
+//
+// The feed is the page, and on a laptop the left rail costs it 272px it could
+// be reading with. Collapsing hides the rail outright rather than narrowing it
+// to icons: a column of unlabelled glyphs is a second navigation to learn, and
+// the same links are already in the drawer on every page.
+[data-warren-sidebar='collapsed'] .App--index .Page-sidebar {
+  display: none;
+}
+
+// The toggle itself: a round button at the head of the feed, on the line the
+// rail used to occupy.
+.Warren-sidebarToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--wr-line-strong);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--wr-ink-dim);
+  cursor: pointer;
+}
+
+.Warren-sidebarToggle:hover {
+  background: var(--wr-pill);
+  color: var(--wr-ink);
+}
+
+.Warren-sidebarToggle .icon {
+  font-size: 13px;
 }

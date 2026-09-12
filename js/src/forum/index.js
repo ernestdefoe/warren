@@ -4,6 +4,7 @@ import Discussion from 'flarum/common/models/Discussion';
 
 import decorateRow from './decorateRow';
 import addRightRail from './addRightRail';
+import addSidebarToggle from './addSidebarToggle';
 import dontTranslateAvatars from './dontTranslateAvatars';
 
 // NOTE: the Admin extender is exported from js/src/admin/index.js and NOWHERE
@@ -22,6 +23,8 @@ import dontTranslateAvatars from './dontTranslateAvatars';
 Discussion.prototype.warrenScore = Model.attribute('warrenScore');
 Discussion.prototype.warrenRank = Model.attribute('warrenRank');
 Discussion.prototype.warrenUserVote = Model.attribute('warrenUserVote');
+Discussion.prototype.warrenImage = Model.attribute('warrenImage');
+Discussion.prototype.warrenExcerpt = Model.attribute('warrenExcerpt');
 
 /*
  * Priority -100 so this initializer runs LAST.
@@ -35,5 +38,6 @@ Discussion.prototype.warrenUserVote = Model.attribute('warrenUserVote');
 app.initializers.add('ernestdefoe-warren', () => {
   decorateRow();
   addRightRail();
+  addSidebarToggle();
   dontTranslateAvatars();
 }, -100);

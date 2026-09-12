@@ -305,3 +305,42 @@
 [data-warren] .DiscussionListItem-controls .Dropdown-toggle {
   color: var(--wr-ink-faint);
 }
+
+// -- The preview ------------------------------------------------------------
+//
+// A post leads with its picture, or with its opening words, never both. A row
+// carrying an image AND three lines of prose is taller than two rows that each
+// carry one, and a feed is a list before it is a gallery.
+.Warren-media {
+  display: block;
+  margin: 8px 0 0;
+  border-radius: var(--wr-radius-sm);
+  overflow: hidden;
+  background: var(--wr-surface);
+}
+
+.Warren-media img {
+  display: block;
+  width: 100%;
+  // Tall images are cropped rather than allowed to run: one portrait photo
+  // should not push every post below it off the screen.
+  max-height: 512px;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.Warren-excerpt {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--wr-ink-dim);
+}
+
+.Warren-excerpt:hover {
+  color: var(--wr-ink-dim);
+  text-decoration: none;
+}
