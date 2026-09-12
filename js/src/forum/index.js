@@ -5,6 +5,7 @@ import Discussion from 'flarum/common/models/Discussion';
 import decorateRow from './decorateRow';
 import addRightRail from './addRightRail';
 import addSidebarToggle from './addSidebarToggle';
+import addSortOptions from './addSortOptions';
 import dontTranslateAvatars from './dontTranslateAvatars';
 
 // NOTE: the Admin extender is exported from js/src/admin/index.js and NOWHERE
@@ -39,5 +40,6 @@ app.initializers.add('ernestdefoe-warren', () => {
   decorateRow();
   addRightRail();
   addSidebarToggle();
+  addSortOptions();
   dontTranslateAvatars();
 }, -100);

@@ -6,6 +6,7 @@
 
 namespace ErnestDefoe\Warren\Api;
 
+use ErnestDefoe\Warren\SharedSchema;
 use Flarum\Api\Schema;
 use Flarum\Extension\ExtensionManager;
 use Illuminate\Contracts\Cache\Repository as Cache;
@@ -25,7 +26,8 @@ class ForumResourceFields
     public function __construct(
         protected ExtensionManager $extensions,
         protected ConnectionInterface $db,
-        protected Cache $cache
+        protected Cache $cache,
+        protected SharedSchema $schema
     ) {
     }
 
@@ -76,6 +78,23 @@ class ForumResourceFields
 
             Schema\Integer::make('warrenMemberCount')
                 ->get(fn (): int => $this->count('users')),
+
+            /*
+             * The API sort strings behind Hot and Top.
+             *
+             * 🚨 Sent rather than hardcoded, because the column behind Hot does
+             * not have one name. It is `hotness` on a forum that has only run
+             * Warren and `trending` on one that has had gamification 2.x, and
+             * the sort is registered under whichever of those the database
+             * actually has. A frontend that guessed would ask for a sort that
+             * does not exist on half the forums this runs on, and the feed
+             * would simply fail to load.
+             */
+            Schema\Str::make('warrenHotSort')
+                ->get(fn (): string => '-'.$this->schema->rankColumn()),
+
+            Schema\Str::make('warrenTopSort')
+                ->get(fn (): string => '-votes'),
         ];
     }
 

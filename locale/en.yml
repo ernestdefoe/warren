@@ -10,6 +10,10 @@ ernestdefoe-warren:
       share: Share
       share_copied: Link copied.
 
+    sort:
+      hot: Hot
+      top: Top
+
     sidebar:
       collapse: Collapse the sidebar
       expand: Show the sidebar
