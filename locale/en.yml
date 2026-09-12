@@ -31,9 +31,23 @@ ernestdefoe-warren:
 
   admin:
     settings:
-      title: Warren
       density_label: Row density
-      density_card: Card — roomy rows on a tinted ground
+      density_help: How much air each post gets in the feed.
+      density_card: Roomy — full spacing and soft corners
       density_compact: Compact — the classic dense list
+
+      default_sort_label: Default view
+      default_sort_help: What the front page opens on before anyone picks a sort.
+      default_sort_hot: Hot — score and age together
+      default_sort_latest: Latest — most recently replied to
+
+      show_about_label: Show the About panel
+      show_about_help: The panel on the right with the forum's description, its counts and a button to start a discussion. Turn it off and the feed takes the space back.
+
+      thread_depth_label: Maximum reply indent
+      thread_depth_help: How far a reply can move right before it stops. Deeper replies still sit under their parent, they just stop indenting — which keeps a long back-and-forth from walking off the side of the column.
+
       allow_self_votes_label: Let people vote on their own posts
       allow_self_votes_help: On by default, matching fof/gamification. Turn it off if you treat a self-upvote as score inflation.
+
+      vote_permission_label: Vote on posts

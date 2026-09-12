@@ -54,7 +54,7 @@ return [
          */
         ->content(function (Document $document) {
             $density = resolve(SettingsRepositoryInterface::class)
-                ->get('warren.density', 'card');
+                ->get('ernestdefoe-warren.density', 'card');
 
             $document->extraAttributes['data-warren'] = in_array($density, ['card', 'compact'], true)
                 ? $density
@@ -114,6 +114,26 @@ return [
                 ->where(...votesOfDirection(-1))
         ),
 
+    /*
+     * 🚨 Every one of these has a READER, and the reader is named beside it.
+     *
+     * A setting with no reader is the commonest bug in this codebase's history:
+     * built, worded, styled, saved to the database, and doing nothing. The
+     * admin page is generated from this list, so anything added here without
+     * wiring it is a control that lies.
+     */
+    (new Extend\Settings())
+        // read by the document stamp above, and by [data-warren='compact']
+        ->default('ernestdefoe-warren.density', 'card')
+        // read by the index endpoint's defaultSort, and by addSortOptions
+        ->default('ernestdefoe-warren.default_sort', 'hot')
+        ->serializeToForum('warrenDefaultSort', 'ernestdefoe-warren.default_sort')
+        // read by addRightRail
+        ->default('ernestdefoe-warren.show_about', true)
+        ->serializeToForum('warrenShowAbout', 'ernestdefoe-warren.show_about', 'boolval')
+        // read by ThreadTree
+        ->default('ernestdefoe-warren.thread_depth', 8),
+
     (new Extend\ApiResource(Resource\ForumResource::class))
         ->fields(Api\ForumResourceFields::class),
 
@@ -153,6 +173,18 @@ return [
              * number than its neighbour for the same row is how a front page
              * reorders itself depending on who touched it last.
              */
+            /*
+             * The operator can put the forum back on Latest.
+             *
+             * 🚨 When they do, Warren adds NO default at all rather than
+             * naming `-lastPostedAt` itself. Core already defaults to that,
+             * and a theme restating another component's default is a second
+             * place to change it — they drift, and the one nobody edited wins.
+             */
+            if (resolve(SettingsRepositoryInterface::class)->get('ernestdefoe-warren.default_sort', 'hot') !== 'hot') {
+                return $endpoint;
+            }
+
             return $endpoint->defaultSort('-'.$rank.',-createdAt');
         })
 
@@ -261,7 +293,7 @@ return [
                 ]),
 
             (new Extend\Settings())
-                ->default('warren.allow_self_votes', true)
-                ->serializeToForum('warrenCanVoteHere', 'warren.allow_self_votes', 'boolval'),
+                ->default('ernestdefoe-warren.allow_self_votes', true)
+                ->serializeToForum('warrenCanVoteHere', 'ernestdefoe-warren.allow_self_votes', 'boolval'),
         ]),
 ];

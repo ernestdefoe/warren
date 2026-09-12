@@ -7,6 +7,7 @@
 namespace ErnestDefoe\Warren\Threading;
 
 use Flarum\Discussion\Discussion;
+use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\User;
 use Illuminate\Database\ConnectionInterface;
 
@@ -41,8 +42,24 @@ class ThreadTree
     protected ?bool $graphExists = null;
 
     public function __construct(
-        protected ConnectionInterface $db
+        protected ConnectionInterface $db,
+        protected SettingsRepositoryInterface $settings
     ) {
+    }
+
+    /**
+     * 🚨 Clamped, not taken as given.
+     *
+     * The value comes from an admin field, and a 0 there would flatten every
+     * discussion while the threading code went on running — a feature that
+     * looks broken rather than switched off. A huge one walks the column off
+     * the side of the page. Neither is a setting anyone means to choose.
+     */
+    protected function maxDepth(): int
+    {
+        $depth = (int) $this->settings->get('ernestdefoe-warren.thread_depth', self::MAX_DEPTH);
+
+        return max(1, min($depth, 20));
     }
 
     /**
@@ -103,6 +120,7 @@ class ThreadTree
 
         $ids = [];
         $depths = [];
+        $max = $this->maxDepth();
 
         /*
          * Depth-first, iteratively.
@@ -118,7 +136,7 @@ class ThreadTree
             [$id, $depth] = array_pop($stack);
 
             $ids[] = $id;
-            $depths[] = min($depth, self::MAX_DEPTH);
+            $depths[] = min($depth, $max);
 
             foreach (array_reverse($children[$id] ?? []) as $child) {
                 $stack[] = [$child, $depth + 1];

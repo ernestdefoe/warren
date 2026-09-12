@@ -52,7 +52,7 @@ class PostPolicy extends AbstractPolicy
          * forum that treats it as score inflation can switch it off.
          */
         if ((int) $actor->id === (int) $post->user_id
-            && ! (bool) $this->settings->get('warren.allow_self_votes', true)) {
+            && ! (bool) $this->settings->get('ernestdefoe-warren.allow_self_votes', true)) {
             return $this->deny();
         }
 

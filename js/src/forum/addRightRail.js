@@ -36,11 +36,17 @@ export default function addRightRail() {
       items.remove(FOF_SIDE_ITEM);
     }
 
+    const widgets = widgetItems().toArray();
+
+    // An empty 316px column pushes the feed off centre for nothing, and the
+    // feed centres perfectly well without it.
+    if (!widgets.length && !sideWidgets) return;
+
     // Priority below 'content' (10) so it lands after the feed column.
     items.add(
       'warrenRail',
       <aside className="Warren-rail">
-        {widgetItems().toArray()}
+        {widgets}
         {sideWidgets}
       </aside>,
       5
@@ -63,7 +69,11 @@ export function widgetItems() {
    *
    * Either shape is fine; a plain function has to be invoked.
    */
-  items.add('about', aboutCard(), 100);
+  // Off means off: the rail renders nothing rather than an empty panel, and
+  // the column below is dropped entirely when it has no widgets.
+  if (app.forum.attribute('warrenShowAbout') !== false) {
+    items.add('about', aboutCard(), 100);
+  }
 
   return items;
 }

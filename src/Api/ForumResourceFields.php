@@ -101,7 +101,7 @@ class ForumResourceFields
     protected function count(string $table): int
     {
         return (int) $this->cache->remember(
-            'warren.count.'.$table,
+            'ernestdefoe-warren.count.'.$table,
             self::COUNT_TTL,
             fn () => $this->db->table($table)->count()
         );

@@ -41,6 +41,17 @@ export default function addSortOptions() {
     if (map.relevance !== undefined) rebuilt.relevance = map.relevance;
 
     /*
+     * 🚨 Whichever sort the SERVER defaults to has to come first.
+     *
+     * The dropdown shows the first key's label when no sort is in the URL, so
+     * on a forum switched to Latest a Hot-first map would caption the control
+     * with a sort the list is not using.
+     */
+    if (app.forum.attribute('warrenDefaultSort') === 'latest') {
+      rebuilt.latest = map.latest;
+    }
+
+    /*
      * 🚨 Identical to the server's default sort, tie-break included.
      *
      * The dropdown shows the FIRST key's label whenever no sort is in the URL,
