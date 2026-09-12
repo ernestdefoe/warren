@@ -145,18 +145,24 @@ class DiscussionResourceFields
     }
 
     /**
-     * Only on a listing, and only when the post is already in memory.
+     * Only on a listing.
      *
-     * 🚨 `relationLoaded` is checked rather than the relation simply read. If
-     * the eager load in extend.php ever stops matching — a renamed endpoint,
-     * another extension replacing the index query — touching
-     * `$discussion->firstPost` would lazily fire one query PER ROW. Returning
-     * nothing instead degrades the feed to a title-only list: visibly poorer,
-     * but not twenty queries a page in production.
+     * 🚨 Deliberately does NOT test `relationLoaded('firstPost')`.
+     *
+     * That test belongs in `firstPostXml()`, and only there. `visible()` is
+     * evaluated BEFORE the endpoint's eager loads have been applied to the
+     * model, so a visibility gate on a loaded relation is always false and the
+     * field never ships at all — the preview was silently absent from every
+     * row while the extraction underneath it worked perfectly.
+     *
+     * The N+1 protection is not lost by moving it: `firstPostXml()` still
+     * refuses to touch an unloaded relation, so if the eager load ever stops
+     * matching the feed degrades to a title-only list rather than firing one
+     * query per row.
      */
     protected function canPreview(Discussion $discussion, Context $context): bool
     {
-        return $context->listing() && $discussion->relationLoaded('firstPost');
+        return $context->listing();
     }
 
     protected function firstPostXml(Discussion $discussion): ?string
