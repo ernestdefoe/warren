@@ -25,6 +25,19 @@
     flex: 0 0 var(--wr-feed-width);
     min-width: 0;
     margin-top: 0;
+
+    /*
+     * The rule between the rail and the feed, and the anchor for the toggle
+     * that sits on it.
+     *
+     * The border lives on the FEED rather than on the rail because it has to
+     * survive the rail being hidden: a divider that disappears with the thing
+     * it divides leaves the collapsed layout with nothing to put the button
+     * on, and the button jumps sideways the moment it is used.
+     */
+    position: relative;
+    border-left: 1px solid var(--wr-line);
+    padding-left: var(--wr-gap);
   }
 
   .Page-container {
@@ -84,9 +97,22 @@
   display: none;
 }
 
-// The toggle itself: a round button at the head of the feed, on the line the
-// rail used to occupy.
+/*
+ * The toggle: a round button centred ON the rule, at the head of the feed.
+ *
+ * 🚨 Positioned against `.Page-content`, which is why that column is the one
+ * carrying `position: relative`. The button is rendered inside the toolbar's
+ * own `<li>`, so it would otherwise resolve against the page and drift with
+ * every change to the toolbar's contents.
+ *
+ * The background is opaque on purpose: the rule runs the full height of the
+ * column and has to stop at the button rather than through it.
+ */
 .Warren-sidebarToggle {
+  position: absolute;
+  left: calc((var(--wr-gap) + 16px) * -1);
+  top: 2px;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -95,9 +121,10 @@
   padding: 0;
   border: 1px solid var(--wr-line-strong);
   border-radius: 50%;
-  background: transparent;
+  background: var(--wr-ground);
   color: var(--wr-ink-dim);
   cursor: pointer;
+  z-index: 1;
 }
 
 .Warren-sidebarToggle:hover {

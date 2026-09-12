@@ -32,6 +32,18 @@
     position: static;
   }
 
+  // One column, so there is nothing to divide and nowhere to hang the toggle.
+  // It is hidden rather than left floating: the drawer already reaches every
+  // link the rail holds.
+  .App--index .Page-content {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .Warren-sidebarToggle {
+    display: none;
+  }
+
   /*
    * The feed comes first and the rails follow it. A phone that opens on a
    * column of navigation nobody asked for has buried the thing they came for
