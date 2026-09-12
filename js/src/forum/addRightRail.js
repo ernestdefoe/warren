@@ -81,14 +81,27 @@ function aboutCard() {
       <div className="Warren-card-body">
         {description ? <p className="Warren-about-text">{description}</p> : null}
 
+        {/*
+          * Warren's own counts, not another theme's.
+          *
+          * Core publishes none on the forum resource, and the ones present on
+          * any given forum belong to whichever other theme is installed —
+          * `respawnPostCount`, `mosaicUserCount`. Reading one of those works
+          * on a forum that happens to have it and shows zeros everywhere else.
+          */}
+        <div className="Warren-card-stat">
+          <span>{app.translator.trans('ernestdefoe-warren.forum.rail.members')}</span>
+          <span>{formatCount(forum.attribute('warrenMemberCount'))}</span>
+        </div>
+
         <div className="Warren-card-stat">
           <span>{app.translator.trans('ernestdefoe-warren.forum.rail.discussions')}</span>
-          <span>{formatCount(forum.attribute('discussionCount'))}</span>
+          <span>{formatCount(forum.attribute('warrenDiscussionCount'))}</span>
         </div>
 
         <div className="Warren-card-stat">
           <span>{app.translator.trans('ernestdefoe-warren.forum.rail.comments')}</span>
-          <span>{formatCount(forum.attribute('postCount'))}</span>
+          <span>{formatCount(forum.attribute('warrenPostCount'))}</span>
         </div>
 
         {/*

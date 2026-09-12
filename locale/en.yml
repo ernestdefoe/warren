@@ -5,13 +5,14 @@ ernestdefoe-warren:
       down: Downvote
 
     row:
-      posted_by: Posted by {user}
+      posted_by: Posted by {author}
       comments: "{count, plural, one {# comment} other {# comments}}"
       share: Share
       share_copied: Link copied.
 
     rail:
       about: About this community
+      members: Members
       discussions: Discussions
       comments: Comments
       create: Create Post

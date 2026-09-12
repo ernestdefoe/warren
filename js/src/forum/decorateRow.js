@@ -92,8 +92,22 @@ function bylineView(discussion) {
       ) : null}
 
       <span className="Warren-byline-meta">
+        {/*
+          * 🚨 The placeholder is `author`, NOT `user`.
+          *
+          * Flarum's translator gives a parameter literally named `user`
+          * special handling: it runs it through the username helper, which
+          * calls `displayName()` on it. Passing a vnode — a link around the
+          * name, which is the whole point here — throws `t.displayName is not
+          * a function` from inside the translator.
+          *
+          * The throw happens while the ItemList callback is still running, so
+          * everything this extension adds AFTER the failing line is silently
+          * missing from the row. The gutter rendered, the byline and the
+          * action bar did not, and nothing in the error named either of them.
+          */}
         {app.translator.trans('ernestdefoe-warren.forum.row.posted_by', {
-          user: user ? <Link href={app.route.user(user)}>{username(user)}</Link> : username(user),
+          author: user ? <Link href={app.route.user(user)}>{username(user)}</Link> : username(user),
         })}
         <span className="Warren-byline-sep">·</span>
         {humanTime(discussion.createdAt())}
