@@ -170,6 +170,29 @@
 [data-warren] .Post-actions {
   opacity: 1;
   visibility: visible;
+  // Core floats the strip right. The controls belong under the start of the
+  // post they act on, where the eye already is after reading it.
+  float: none;
+  margin-top: 8px;
+}
+
+/*
+ * 🚨 fof/gamification's own vote control is hidden, not left beside ours.
+ *
+ * Warren does not stand its UI down on a gamification forum — it stands its
+ * WRITES down and drives gamification's endpoint with its own arrows, so the
+ * theme stays one theme. The consequence is that both controls render, and a
+ * post showing two sets of vote buttons over the same rows is worse than
+ * either alone: they agree, so the second one is pure confusion.
+ *
+ * Hidden rather than removed from the ItemList in JS. The item belongs to
+ * another extension; taking it out of the list would also take it away from
+ * anything else reading that list, and a theme has no business editing another
+ * extension's contributions. A stylesheet rule is reversible by anyone who
+ * disagrees.
+ */
+[data-warren] .Post-actions > ul > .item-votes {
+  display: none;
 }
 
 [data-warren] .Post-actions > ul {
