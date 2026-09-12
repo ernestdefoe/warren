@@ -155,13 +155,33 @@
 // The same pill as the feed, in the strip core already renders at the foot of
 // a post. Matching them is the point: a score that looks one way in the list
 // and another inside the thread reads as two different sites.
+/*
+ * 🚨 Always visible, and the flex container is the UL.
+ *
+ * Core fades this whole strip in on hover — `opacity: 0` until the post is
+ * pointed at — which is right for Reply and wrong for a score. A number you
+ * have to hover to read is not a score, and on a touch screen there is no
+ * hover to give. The pill rendered correctly from the first deploy and was
+ * simply invisible, which reads as a control that was never built.
+ *
+ * The strip is `aside > ul > li`, so flex on the aside lays out one child and
+ * the gap between the items never applies.
+ */
 [data-warren] .Post-actions {
+  opacity: 1;
+  visibility: visible;
+}
+
+[data-warren] .Post-actions > ul {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-[data-warren] .Post-actions > li {
+[data-warren] .Post-actions > ul > li {
   display: flex;
   align-items: center;
   margin: 0;
