@@ -4,9 +4,18 @@ import Admin from 'flarum/common/extenders/Admin';
 /**
  * Warren's admin settings.
  *
- * 🚨 In an Admin extender rather than inside `app.initializers.add`, because
- * `app.extensionData` is registered by a core admin initializer that may not
- * have run when ours fires.
+ * 🚨 An Admin extender, never `app.extensionData.for(...)` in an initializer.
+ *
+ * That was the Flarum 1 API and in Flarum 2 the property is GONE — not
+ * deprecated, absent. It was renamed to `app.registry` and marked `@internal`,
+ * so the extender is the supported way in.
+ *
+ * The failure is quiet: core wraps every initializer in a try/catch, so the
+ * TypeError shows up as one toast saying the extension "failed to initialize"
+ * and the settings simply never appear. Everything else on the page registers
+ * normally, which is what makes it look like a missing feature rather than a
+ * crash. `ernestdefoe/ridge` and `ernestdefoe/marginalia` are both sitting on
+ * this right now.
  *
  * 🚨 And exported from js/src/admin/index.js and NOWHERE else. This calls
  * `app.extensionData`, which exists only on the admin frontend —
