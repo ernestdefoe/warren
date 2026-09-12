@@ -148,6 +148,20 @@ return [
                 });
         }),
 
+    (new Extend\ApiResource(Resource\PostResource::class))
+        ->fields(Api\PostResourceFields::class)
+        ->endpoint(['index', 'show', 'update'], function (Endpoint\Index|Endpoint\Show|Endpoint\Update $endpoint) {
+            /*
+             * One query for a whole thread's worth of arrows.
+             *
+             * Constrained by ROW to this actor, never by column - the same
+             * rule as the discussion index, and for the same reason.
+             */
+            return $endpoint->eagerLoadWhere('warrenVotes', function ($query, Context $context) {
+                $query->where('user_id', $context->getActor()->id ?? 0);
+            });
+        }),
+
     /*
      * 🚨 Warren's own voting stands down when fof/gamification is enabled.
      *
@@ -172,7 +186,7 @@ return [
                 ->modelPolicy(Post::class, Access\PostPolicy::class),
 
             (new Extend\ApiResource(Resource\PostResource::class))
-                ->fields(Api\PostResourceFields::class),
+                ->fields(Api\PostVoteField::class),
 
             /*
              * Hot and Top.

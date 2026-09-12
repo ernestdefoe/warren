@@ -1,11 +1,13 @@
 import app from 'flarum/forum/app';
 import Model from 'flarum/common/Model';
 import Discussion from 'flarum/common/models/Discussion';
+import Post from 'flarum/common/models/Post';
 
 import decorateRow from './decorateRow';
 import addRightRail from './addRightRail';
 import addSidebarToggle from './addSidebarToggle';
 import addSortOptions from './addSortOptions';
+import addPostVotes from './addPostVotes';
 import dontTranslateAvatars from './dontTranslateAvatars';
 
 // NOTE: the Admin extender is exported from js/src/admin/index.js and NOWHERE
@@ -27,6 +29,13 @@ Discussion.prototype.warrenUserVote = Model.attribute('warrenUserVote');
 Discussion.prototype.warrenImage = Model.attribute('warrenImage');
 Discussion.prototype.warrenExcerpt = Model.attribute('warrenExcerpt');
 
+// The same, for a comment. A post has no denormalised score column, so the
+// number is two counted aggregates the frontend subtracts.
+Post.prototype.warrenUpvotes = Model.attribute('warrenUpvotes');
+Post.prototype.warrenDownvotes = Model.attribute('warrenDownvotes');
+Post.prototype.warrenUserVote = Model.attribute('warrenUserVote');
+Post.prototype.warrenCanVote = Model.attribute('warrenCanVote');
+
 /*
  * Priority -100 so this initializer runs LAST.
  *
@@ -41,5 +50,6 @@ app.initializers.add('ernestdefoe-warren', () => {
   addRightRail();
   addSidebarToggle();
   addSortOptions();
+  addPostVotes();
   dontTranslateAvatars();
 }, -100);

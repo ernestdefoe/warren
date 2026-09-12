@@ -149,3 +149,31 @@
 [data-warren] .PostStreamScrubber-scrollbar {
   color: var(--wr-ink-faint);
 }
+
+// -- Votes on a comment -----------------------------------------------------
+//
+// The same pill as the feed, in the strip core already renders at the foot of
+// a post. Matching them is the point: a score that looks one way in the list
+// and another inside the thread reads as two different sites.
+[data-warren] .Post-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+[data-warren] .Post-actions > li {
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+[data-warren] .Post-actions .Warren-votes {
+  // Slightly tighter than the feed's: a thread is a column of these and the
+  // full-height pill on every comment turns into a stack of lozenges.
+  height: 28px;
+}
+
+[data-warren] .Post-actions .Warren-arrow {
+  width: 26px;
+  height: 24px;
+}
