@@ -1,14 +1,44 @@
 # Warren
 
-**A Reddit-inspired theme for Flarum 2.** A vote gutter down the left of every
-row, compact link rows with the thumbnail on the right, Hot / New / Top
-sorting, and threaded comments.
+**A Reddit-inspired theme for Flarum 2.** Compact posts on a dark ground, a
+vote pill under each one, image and text previews, Hot / New / Top sorting, a
+collapsible rail, and genuinely threaded comments.
 
 Free and MIT, like [Cascade](https://github.com/ernestdefoe/cascade).
 
-> [!NOTE]
-> Early work in progress. The schema and the interop contract below are
-> settled; the theme around them is being built.
+![Warren's discussion list](screenshots/feed.png)
+
+---
+
+## What it does
+
+- **Posts, not rows.** No cards and no borders — each post sits on the ground,
+  separated by a hairline, and lifts on hover.
+- **A vote pill** at the foot of every post and every comment, which fills with
+  the vote's colour once you pick a side.
+- **Previews.** A post leads with its first image, or with its opening lines
+  when it has none. Never both: a row carrying a picture *and* three lines of
+  prose is taller than two rows that each carry one.
+- **Hot and Top** in the sort control, with Hot as the default.
+- **A collapsible left rail** that hands its width back to the feed.
+- **An About panel**, and a **hashtag cloud** when
+  [Hashtags](https://github.com/ernestdefoe/hashtags) is installed.
+- **Threaded comments**, below.
+
+---
+
+## Threading, with nothing to migrate
+
+Replies nest under the comment they answer, with a collapse control on any post
+that has children.
+
+🚨 **There is no new table and no backfill.** `flarum/mentions` has recorded the
+reply graph in `post_mentions_post` every time somebody quoted or replied to a
+post since 2015. Warren reads that, so a forum that has been running for years
+threads its **whole history** the moment the theme is enabled — which is not
+true of any design that starts recording a parent from today.
+
+Without `flarum/mentions` every discussion simply renders flat.
 
 ---
 
@@ -75,6 +105,19 @@ not be able to destroy a forum's data on its way out.
 
 ---
 
+## Settings
+
+| | |
+|---|---|
+| **Row density** | Roomy, or the classic dense list. |
+| **Default view** | Hot, or Latest. |
+| **Show the About panel** | Off gives the width back to the feed. |
+| **Hashtags in the cloud** | Only when the Hashtags extension is enabled. |
+| **Maximum reply indent** | How far a reply can move right before it stops. Deeper replies still sit under their parent. |
+| **Let people vote on their own posts** | Only when gamification is *not* installed; it has its own. |
+
+---
+
 ## Requirements
 
 | | |
@@ -82,9 +125,30 @@ not be able to destroy a forum's data on its way out.
 | Flarum | `2.0` or newer |
 | PHP | `8.3+` |
 
-Nothing else is required. `flarum/mentions` is strongly suggested — threaded
-comments are rendered from the reply graph it already stores, so without it
-every discussion renders flat.
+Nothing else is required.
+
+| Suggested | What it adds |
+|---|---|
+| `flarum/mentions` | Threaded comments. Without it, discussions render flat. |
+| `fof/gamification` | Ranks, vote notifications and per-user points on the same votes. |
+| `flarum/tags` | The community mark and name on every post. |
+| `ernestdefoe/hashtags` | The hashtag cloud in the rail. |
+
+---
+
+## Installation
+
+```bash
+composer require ernestdefoe/warren
+php flarum cache:clear
+```
+
+Then enable **Warren** in the admin panel.
+
+> [!TIP]
+> Only one theme should be enabled at a time — two compile into one stylesheet
+> and fight. [Wardrobe](https://github.com/ernestdefoe/wardrobe) exists if you
+> want several installed and a per-member picker.
 
 ---
 
