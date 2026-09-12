@@ -15,15 +15,16 @@ Free and MIT, like [Cascade](https://github.com/ernestdefoe/cascade).
 ## It shares fof/gamification's votes on purpose
 
 Warren does **not** keep its own vote table. It reads and writes `post_votes`
-and the `votes` / `hotness` columns on `discussions` — the same ones
+and the score and ranking columns on `discussions` — the same ones
 [fof/gamification](https://github.com/FriendsOfFlarum/gamification) has used
 since 2019.
 
 That means:
 
 - Start on Warren's voting, install gamification later — **every vote is still
-  there**, and its ranks and notifications start working on the history you
-  already have.
+  there**, and its ranks, notifications and per-user point totals start working
+  on the history you already have. It recomputes those totals by summing the
+  whole table, so nothing needs backfilling.
 - Already using gamification — Warren shows those votes from the first page
   load, and stands its own voting down so you never see two vote controls on
   one post.
@@ -32,10 +33,33 @@ That means:
 There is no export, no import command and no reconciliation step, because there
 is never a second copy of the data to reconcile.
 
-`hotness` is the [published Reddit ranking
-algorithm](https://github.com/reddit-archive/reddit), which is what
-gamification implements too, so Hot means the same thing whichever is doing the
-writing.
+### Why the schema looks a decade old
+
+Warren creates `post_votes` in gamification's **2019** shape — `id`, `post_id`,
+`user_id`, `type` — and calls the discussion's ranking column `hotness`. Both
+are names gamification itself has since moved on from: it replaced `type` with
+an integer `value` in 2020, and renamed `hotness` to `trending` in its Flarum 2
+release.
+
+Creating the modern names would be the obvious choice and it is the wrong one.
+Gamification's migrations are tracked per extension, so installing it later
+replays its **whole** chain — and the two migrations that do this work are
+unguarded. On a table that already had a `value` column, adding one is a
+duplicate-column error; renaming a `hotness` that was never there is another.
+Either would mean gamification simply **fails to install** on any forum that
+had run Warren first.
+
+The 2019 shape is the only one the chain replays cleanly from. Every later
+gamification migration then does exactly what it was written to do, to Warren's
+rows: add `value`, convert them, drop `type`, add the timestamps, add the
+foreign keys, add the unique index, rename the ranking column. A forum that
+switches ends up with a table indistinguishable from one gamification built
+itself.
+
+Warren pays for that by reading both shapes at runtime, which is a dozen lines
+in one class, and by ranking with gamification's arithmetic rather than
+reddit's where the two differ. Agreeing with the neighbour matters more than
+being right alone for a column neither extension owns by itself.
 
 ### The one thing to know
 

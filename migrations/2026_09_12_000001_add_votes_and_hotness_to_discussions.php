@@ -14,19 +14,27 @@ use Illuminate\Database\Schema\Builder;
  * work on a forum that has only ever used Warren, and Warren's work on a forum
  * that has only ever used gamification.
  *
- * 🚨 `hotness` is the published Reddit algorithm, not an invention of either
- * extension. Gamification credits reddit's own repository in its source, and
- * Warren computes it identically:
+ * 🚨 `hotness` is copied from gamification's arithmetic, character for
+ * character, and NOT from reddit's:
  *
  *     round(log10(max(|score|, 1)) + (sign(score) * seconds) / 45000, 10)
  *
- * That matters for interoperability: two extensions writing the same column
- * with different maths would leave a forum's front page reordering itself
- * depending on which one last touched a discussion.
+ * Reddit's published version applies the sign to the ORDER term, not to the
+ * seconds — `order * sign + seconds / 45000`. Gamification credits reddit in
+ * its source but writes the expression above, and on a downvoted discussion
+ * the two disagree wildly: reddit nudges it down by a point or so, this drives
+ * it thirty years into the past.
+ *
+ * Warren matches gamification anyway, because the column is shared. Two
+ * extensions writing the same column with different maths would leave a
+ * forum's front page reordering itself depending on which one last touched a
+ * discussion, and "the same as the neighbour" beats "more correct in
+ * isolation" for a value neither of us owns alone.
  *
  * Guarded on `votes` alone, exactly as gamification guards it — the two columns
  * are always added together by both, so one is a sufficient sentinel for the
- * pair.
+ * pair. No index on `votes` here: gamification adds one in 2021 and an index
+ * of the same name cannot be created twice.
  *
  * 🚨 `down` removes NOTHING. Dropping these would blank the score on every
  * discussion for gamification too. See the vote-table migration for the full
@@ -40,6 +48,13 @@ return [
         }
 
         $schema->table('discussions', function (Blueprint $table) {
+            /*
+             * Gamification declares these without defaults. Warren adds them,
+             * because a NOT NULL integer with no default is an insert error on
+             * a forum in strict mode the moment anything creates a discussion
+             * without naming the column. Same name, same type, same width —
+             * a default is invisible to a reader and to gamification's guard.
+             */
             $table->integer('votes')->default(0);
             $table->float('hotness', 10, 4)->default(0);
         });

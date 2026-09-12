@@ -12,18 +12,29 @@ use Illuminate\Database\Schema\Builder;
  * cast is still there. Nothing to export, nothing to reconcile, no import
  * command. That is the whole reason this file looks like somebody else's.
  *
- * 🚨 EXACTLY the base shape: id, post_id, user_id, type. Nothing else.
+ * 🚨 EXACTLY gamification's 2019 shape: id, post_id, user_id, type. Not the
+ * shape gamification runs on TODAY, and that is the deliberate part.
  *
- * Gamification adds `created_at`/`updated_at` in a later migration of its own,
- * and it does so with Flarum's `Migration::addColumns`, which does NOT check
- * whether a column already exists — it calls `addColumn` unconditionally. So if
- * this table were created with timestamps already on it, installing
- * gamification afterwards would fail on a duplicate column and the admin would
- * be left with a half-migrated extension. Their foreign keys and their unique
- * index are omitted for the same reason.
+ * Gamification replaced `type` with an integer `value` in 2020, converting
+ * every row and dropping the old column. Creating the modern shape here would
+ * be the obvious move and it is the wrong one: gamification's migrations are
+ * tracked per extension, so installing it later replays the WHOLE chain, and
+ * its 2020 migration adds `value` unguarded. On a table that already had one,
+ * that is a duplicate-column error — enabling gamification would fail outright
+ * on any forum that had run Warren first.
+ *
+ * The 2019 shape is the only one the chain replays cleanly from. Every later
+ * gamification migration then does exactly what it was written to do, on
+ * Warren's rows: add `value`, convert them, drop `type`, add timestamps, add
+ * the foreign keys, add the unique index. A forum that switches ends up with a
+ * table indistinguishable from one gamification built itself.
+ *
+ * Which is why none of those are here. Timestamps in particular: gamification
+ * adds them with Flarum's `Migration::addColumns`, which does NOT check whether
+ * a column exists — it calls `addColumn` unconditionally.
  *
  * The cost is that a Warren-only forum has no unique index on
- * (user_id, post_id), so uniqueness is enforced in code instead — which the
+ * (post_id, user_id), so uniqueness is enforced in code instead — which the
  * voting UI has to do anyway, because a vote is a toggle rather than an insert.
  *
  * 🚨 `down` removes NOTHING, and that asymmetry is the point.
@@ -46,9 +57,31 @@ return [
             $table->increments('id');
             $table->integer('post_id')->unsigned();
             $table->integer('user_id')->unsigned();
-            // 'up' or 'down' — matching gamification's stored values exactly,
-            // because the whole point is that both read the same rows.
+            /*
+             * 🚨 The values are 'Up' and 'Down', capitalised. See SharedSchema.
+             *
+             * Gamification's converter tests `$vote->type === 'Up'` exactly.
+             * Anything it does not recognise maps to 0, and a row that maps to
+             * 0 is DELETED rather than kept — so lowercase here would mean
+             * every vote cast through Warren silently vanished on the day
+             * someone installed gamification. That is the exact outcome this
+             * whole shared-table design exists to prevent, undone by two
+             * characters.
+             */
             $table->string('type');
+
+            /*
+             * Not gamification's — it has no plain index here, only the unique
+             * one it adds in 2022, and that one is named differently
+             * (`..._unique` vs `..._index`), so both can exist and the later
+             * migration still succeeds.
+             *
+             * Warren needs it because the discussion list asks
+             * `post_id IN (…) AND user_id = ?` on every page load. Without an
+             * index that is a full scan of every vote on the forum to draw
+             * twenty arrows.
+             */
+            $table->index(['post_id', 'user_id']);
         });
     },
 
