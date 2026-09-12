@@ -56,9 +56,30 @@ return [
             $density = resolve(SettingsRepositoryInterface::class)
                 ->get('ernestdefoe-warren.density', 'card');
 
-            $document->extraAttributes['data-warren'] = in_array($density, ['card', 'compact'], true)
-                ? $density
-                : 'card';
+            $density = in_array($density, ['card', 'compact'], true) ? $density : 'card';
+
+            /*
+             * 🚨 A CLOSURE, not the string itself. This is not style.
+             *
+             * Core renders extraAttributes through
+             * `if (is_callable($value)) { $value = $value($this->request); }`
+             * — and `is_callable()` says TRUE for any string that names a PHP
+             * function. The stored value here is the word `compact`, which is
+             * a PHP function, so handing core the bare string made it CALL it:
+             *
+             *     Error: Cannot call compact() dynamically
+             *
+             * That is a 500 on every page of the forum, produced by choosing
+             * an ordinary English word in an admin dropdown. And it is not
+             * specific to this word — `list`, `sort`, `key`, `min`, `max`,
+             * `count`, `date`, `link`, `header` and dozens more are all PHP
+             * functions, so any future value could do it again.
+             *
+             * A closure is callable on purpose: core invokes it, gets the
+             * string back, and no value can ever be mistaken for a function
+             * name again. Fixing only today's word would leave the trap set.
+             */
+            $document->extraAttributes['data-warren'] = fn () => $density;
         }),
 
     (new Extend\Frontend('admin'))
