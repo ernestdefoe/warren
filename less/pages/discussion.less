@@ -65,6 +65,25 @@
   border-bottom: 1px solid var(--wr-line);
 }
 
+/*
+ * 🚨 Give the post footer a real height.
+ *
+ * Core sets `.Post-footer { display: inline-block; height: 0 }` on purpose:
+ * it normally holds one line of small print ("X replied to this") and is not
+ * meant to push anything down. But anything TALL that an extension puts there
+ * — Topic Map's stats row is 53px — then hangs outside the post's box
+ * entirely, which on this theme means it falls below the hairline that
+ * separates one post from the next. Measured: the stats row ended 5px past
+ * the bottom of its own post and overlapped the next one by 4px.
+ *
+ * An empty footer still computes to zero height, so nothing gains space that
+ * did not need it; a footer with content simply stops overflowing.
+ */
+[data-warren] .PostStream .Post-footer {
+  display: block;
+  height: auto;
+}
+
 [data-warren] .PostStream .CommentPost .Post-body {
   color: var(--wr-ink);
   font-size: 15px;
