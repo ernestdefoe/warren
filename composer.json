@@ -49,6 +49,7 @@
         "sort-packages": true
     },
     "support": {
+        "forum": "https://discuss.flarum.org/d/39850-warren-a-reddit-inspired-theme-built-using-ai",
         "issues": "https://github.com/ernestdefoe/warren/issues",
         "source": "https://github.com/ernestdefoe/warren"
     }
