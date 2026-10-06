@@ -170,6 +170,10 @@ easy to reintroduce by copying the earlier shape:
 - The sidebar stacks above the feed on mobile unless it is explicitly ordered
   below it.
 
+## Discuss
+
+Questions, ideas and release notes: [Warren on discuss.flarum.org](https://discuss.flarum.org/d/39850-warren-a-reddit-inspired-theme-built-using-ai).
+
 ## Licence
 
 MIT.
