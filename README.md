@@ -170,9 +170,11 @@ easy to reintroduce by copying the earlier shape:
 - The sidebar stacks above the feed on mobile unless it is explicitly ordered
   below it.
 
-## Discuss
+## Support
 
-Questions, ideas and release notes: [Warren on discuss.flarum.org](https://discuss.flarum.org/d/39850-warren-a-reddit-inspired-theme-built-using-ai).
+- **Support forum:** [Warren on ernestdefoe.online](https://ernestdefoe.online/d/96)
+- **Flarum community:** [Warren on discuss.flarum.org](https://discuss.flarum.org/d/39850-warren-a-reddit-inspired-theme-built-using-ai)
+- **Bug reports:** [GitHub issues](https://github.com/ernestdefoe/warren/issues)
 
 ## Licence
 
