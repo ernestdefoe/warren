@@ -99,21 +99,19 @@ function aboutCard() {
 
   return (
     <div className="Warren-card Warren-card--about">
-      <div className="Warren-card-head Warren-card-head--accent">
-        {app.translator.trans('ernestdefoe-warren.forum.rail.about')}
-      </div>
+      <div className="Warren-card-head Warren-card-head--accent">{app.translator.trans('ernestdefoe-warren.forum.rail.about')}</div>
 
       <div className="Warren-card-body">
         {description ? <p className="Warren-about-text">{description}</p> : null}
 
         {/*
-          * Warren's own counts, not another theme's.
-          *
-          * Core publishes none on the forum resource, and the ones present on
-          * any given forum belong to whichever other theme is installed —
-          * `respawnPostCount`, `mosaicUserCount`. Reading one of those works
-          * on a forum that happens to have it and shows zeros everywhere else.
-          */}
+         * Warren's own counts, not another theme's.
+         *
+         * Core publishes none on the forum resource, and the ones present on
+         * any given forum belong to whichever other theme is installed —
+         * `respawnPostCount`, `mosaicUserCount`. Reading one of those works
+         * on a forum that happens to have it and shows zeros everywhere else.
+         */}
         <div className="Warren-card-stat">
           <span>{app.translator.trans('ernestdefoe-warren.forum.rail.members')}</span>
           <span>{formatCount(forum.attribute('warrenMemberCount'))}</span>
@@ -130,12 +128,12 @@ function aboutCard() {
         </div>
 
         {/*
-          * 🚨 Only when the actor can actually start one.
-          *
-          * A primary-coloured button that answers a click with a permission
-          * error is worse than no button — it is the forum telling a reader
-          * they are welcome and then refusing them.
-          */}
+         * 🚨 Only when the actor can actually start one.
+         *
+         * A primary-coloured button that answers a click with a permission
+         * error is worse than no button — it is the forum telling a reader
+         * they are welcome and then refusing them.
+         */}
         {app.forum.attribute('canStartDiscussion') ? (
           <Button
             className="Button Button--primary Warren-about-cta"

@@ -62,11 +62,7 @@ export default class VoteGutter extends Component {
     return (
       <button
         type="button"
-        className={classList(
-          'Warren-arrow',
-          `Warren-arrow--${direction}`,
-          active && 'Warren-arrow--active'
-        )}
+        className={classList('Warren-arrow', `Warren-arrow--${direction}`, active && 'Warren-arrow--active')}
         // A guest sees the arrows and is sent to log in, which is what every
         // site with this control does. Hiding them would hide the score's
         // explanation along with them.
@@ -115,9 +111,7 @@ export default class VoteGutter extends Component {
      * that would 404.
      */
     const firstPost = discussion.firstPost();
-    const postId = firstPost
-      ? firstPost.id()
-      : discussion.data.relationships?.firstPost?.data?.id;
+    const postId = firstPost ? firstPost.id() : discussion.data.relationships?.firstPost?.data?.id;
 
     if (!postId) return;
 
@@ -128,9 +122,7 @@ export default class VoteGutter extends Component {
     // server does too — the two have to agree or the optimistic number is
     // wrong for the length of a round trip.
     const next = active ? null : direction;
-    const delta =
-      (next === 'up' ? 1 : next === 'down' ? -1 : 0) -
-      (was === 'up' ? 1 : was === 'down' ? -1 : 0);
+    const delta = (next === 'up' ? 1 : next === 'down' ? -1 : 0) - (was === 'up' ? 1 : was === 'down' ? -1 : 0);
 
     this.vote = next;
     this.score = (this.score === null ? discussion.warrenScore() || 0 : this.score) + delta;

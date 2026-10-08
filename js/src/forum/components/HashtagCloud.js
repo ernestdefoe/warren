@@ -55,16 +55,10 @@ export default class HashtagCloud extends Component {
 
     return (
       <div className="Warren-card Warren-card--hashtags">
-        <div className="Warren-card-head">
-          {app.translator.trans('ernestdefoe-warren.forum.rail.hashtags')}
-        </div>
+        <div className="Warren-card-head">{app.translator.trans('ernestdefoe-warren.forum.rail.hashtags')}</div>
 
         <div className="Warren-card-body">
-          {this.loading ? (
-            <LoadingIndicator display="block" size="small" />
-          ) : (
-            <div className="Warren-hashtags">{this.tags.map(hashtagView)}</div>
-          )}
+          {this.loading ? <LoadingIndicator display="block" size="small" /> : <div className="Warren-hashtags">{this.tags.map(hashtagView)}</div>}
         </div>
       </div>
     );

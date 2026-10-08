@@ -80,12 +80,7 @@ function bylineView(discussion) {
   const tag = tags && tags.length ? tags[0] : null;
   const badges = discussion.badges().toArray();
 
-  const mark = (
-    <span
-      className="Warren-community-dot"
-      style={tag && tag.color() ? { background: tag.color() } : null}
-    />
-  );
+  const mark = <span className="Warren-community-dot" style={tag && tag.color() ? { background: tag.color() } : null} />;
 
   return (
     <div className="Warren-byline">
@@ -100,18 +95,18 @@ function bylineView(discussion) {
 
       <span className="Warren-byline-meta">
         {/*
-          * 🚨 The placeholder is `author`, NOT `user`.
-          *
-          * Flarum's translator gives a parameter literally named `user`
-          * special handling: it runs the value through the username helper,
-          * which calls `displayName()` on it. Passing a vnode — a link around
-          * the name, which is the whole point here — throws `t.displayName is
-          * not a function` from inside the translator.
-          *
-          * The throw happens while this ItemList callback is still running, so
-          * everything added AFTER the failing line is silently missing from
-          * the row, and nothing in the error names either piece.
-          */}
+         * 🚨 The placeholder is `author`, NOT `user`.
+         *
+         * Flarum's translator gives a parameter literally named `user`
+         * special handling: it runs the value through the username helper,
+         * which calls `displayName()` on it. Passing a vnode — a link around
+         * the name, which is the whole point here — throws `t.displayName is
+         * not a function` from inside the translator.
+         *
+         * The throw happens while this ItemList callback is still running, so
+         * everything added AFTER the failing line is silently missing from
+         * the row, and nothing in the error names either piece.
+         */}
         {app.translator.trans('ernestdefoe-warren.forum.row.posted_by', {
           author: user ? <Link href={app.route.user(user)}>{username(user)}</Link> : username(user),
         })}
@@ -119,9 +114,7 @@ function bylineView(discussion) {
         {humanTime(discussion.createdAt())}
       </span>
 
-      {badges.length ? (
-        <ul className="DiscussionListItem-badges badges badges--packed">{listItems(badges)}</ul>
-      ) : null}
+      {badges.length ? <ul className="DiscussionListItem-badges badges badges--packed">{listItems(badges)}</ul> : null}
     </div>
   );
 }
@@ -141,13 +134,13 @@ function previewView(discussion) {
     return (
       <Link className="Warren-media" href={app.route.discussion(discussion)}>
         {/*
-          * 🚨 loading="lazy" and an empty alt.
-          *
-          * Lazy because a feed of twenty posts is twenty full-size images the
-          * reader has not scrolled to yet. Empty alt because the link around
-          * it is already labelled by the title directly above - a screen
-          * reader announcing the filename here would read the post twice.
-          */}
+         * 🚨 loading="lazy" and an empty alt.
+         *
+         * Lazy because a feed of twenty posts is twenty full-size images the
+         * reader has not scrolled to yet. Empty alt because the link around
+         * it is already labelled by the title directly above - a screen
+         * reader announcing the filename here would read the post twice.
+         */}
         <img src={image} alt="" loading="lazy" />
       </Link>
     );
@@ -204,11 +197,7 @@ function actionsView(discussion) {
 function share(discussion) {
   const url = app.forum.attribute('baseUrl') + app.route.discussion(discussion);
 
-  const done = () =>
-    app.alerts.show(
-      { type: 'success' },
-      app.translator.trans('ernestdefoe-warren.forum.row.share_copied')
-    );
+  const done = () => app.alerts.show({ type: 'success' }, app.translator.trans('ernestdefoe-warren.forum.row.share_copied'));
 
   if (navigator.clipboard) {
     navigator.clipboard.writeText(url).then(done, () => window.prompt('', url));

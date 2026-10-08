@@ -42,11 +42,7 @@ export default function addSidebarToggle() {
 function toggleView() {
   const isCollapsed = collapsed();
 
-  const label = app.translator.trans(
-    isCollapsed
-      ? 'ernestdefoe-warren.forum.sidebar.expand'
-      : 'ernestdefoe-warren.forum.sidebar.collapse'
-  );
+  const label = app.translator.trans(isCollapsed ? 'ernestdefoe-warren.forum.sidebar.expand' : 'ernestdefoe-warren.forum.sidebar.collapse');
 
   return (
     <button

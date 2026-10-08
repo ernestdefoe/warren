@@ -79,9 +79,7 @@ export default class PostVotes extends Component {
     // wrong for the length of a round trip.
     const next = active ? null : direction;
 
-    this.delta +=
-      (next === 'up' ? 1 : next === 'down' ? -1 : 0) -
-      (was === 'up' ? 1 : was === 'down' ? -1 : 0);
+    this.delta += (next === 'up' ? 1 : next === 'down' ? -1 : 0) - (was === 'up' ? 1 : was === 'down' ? -1 : 0);
 
     this.vote = next;
     this.saving = true;

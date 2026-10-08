@@ -1,6 +1,6 @@
-# The thing in this repo that can drift silently is the committed JS bundle:
-# it is what forums actually load, and nothing rebuilds it on install. The
-# composer manifest is checked alongside it.
+# What the shared Flarum workflows (backend.yml, frontend.yml) don't check:
+# that composer.json is valid, and that the committed JS bundle — what forums
+# actually load, never rebuilt on install — matches a fresh build of js/src.
 
 name: CI
 
@@ -14,8 +14,8 @@ permissions:
   contents: read
 
 jobs:
-  php:
-    name: PHP
+  composer:
+    name: composer.json
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,10 +27,6 @@ jobs:
 
       - name: Validate composer.json
         run: composer validate --strict
-
-      # Since ships no src/ — extend.php is the whole PHP surface.
-      - name: Lint extend.php
-        run: php -l extend.php
 
   js:
     name: JS bundle

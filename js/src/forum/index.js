@@ -49,12 +49,16 @@ Discussion.prototype.warrenThread = Model.attribute('warrenThread');
  * side section out of the list. Registering first would mean looking for that
  * item before FoF had added it, and the forum would get a fourth column.
  */
-app.initializers.add('ernestdefoe-warren', () => {
-  decorateRow();
-  addRightRail();
-  addSidebarToggle();
-  addSortOptions();
-  addPostVotes();
-  addThreading();
-  dontTranslateAvatars();
-}, -100);
+app.initializers.add(
+  'ernestdefoe-warren',
+  () => {
+    decorateRow();
+    addRightRail();
+    addSidebarToggle();
+    addSortOptions();
+    addPostVotes();
+    addThreading();
+    dontTranslateAvatars();
+  },
+  -100
+);
