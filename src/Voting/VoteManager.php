@@ -100,7 +100,7 @@ class VoteManager
 
     public function refreshDiscussion(Discussion $discussion): void
     {
-        $discussion->votes = $this->scoreFor((int) $discussion->first_post_id);
+        $discussion->setAttribute('votes', $this->scoreFor((int) $discussion->first_post_id));
 
         $this->hotness->apply($discussion);
 

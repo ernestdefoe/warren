@@ -9,6 +9,7 @@ namespace ErnestDefoe\Warren;
 use Flarum\Database\AbstractModel;
 use Flarum\Post\Post;
 use Flarum\User\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * One person's vote on one post.
@@ -70,12 +71,14 @@ class Vote extends AbstractModel
         return $this->direction() > 0;
     }
 
-    public function post()
+    /** @return BelongsTo<Post, $this> */
+    public function post(): BelongsTo
     {
         return $this->belongsTo(Post::class);
     }
 
-    public function user()
+    /** @return BelongsTo<User, $this> */
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }

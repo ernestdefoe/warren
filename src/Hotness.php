@@ -34,7 +34,7 @@ class Hotness
 
     public function for(Discussion $discussion): float
     {
-        $score = (int) $discussion->votes;
+        $score = (int) $discussion->getAttribute('votes');
 
         $order = log10(max(abs($score), 1));
 
