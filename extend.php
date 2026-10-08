@@ -21,24 +21,6 @@ use Flarum\Frontend\Document;
 use Flarum\Post\Post;
 use Flarum\Settings\SettingsRepositoryInterface;
 
-/**
- * The column and value a vote in this direction is stored as.
- *
- * 🚨 Neither is a constant. The direction lives in `type` ('Up'/'Down') on a
- * forum that has only ever run Warren and in `value` (1/-1) once
- * fof/gamification has migrated the table -- see SharedSchema. Resolved at
- * call time rather than at boot so the answer cannot be cached from before a
- * migration ran.
- *
- * @return array{string, int|string}
- */
-function votesOfDirection(int $direction): array
-{
-    $schema = resolve(SharedSchema::class);
-
-    return [$schema->voteColumn(), $schema->encode($direction)];
-}
-
 return [
     (new Extend\Frontend('forum'))
         ->js(__DIR__.'/js/dist/forum.js')
@@ -127,12 +109,12 @@ return [
         ->relationship(
             'warrenVotesUp',
             fn (Post $post) => $post->hasMany(Vote::class, 'post_id')
-                ->where(...votesOfDirection(1))
+                ->where(...resolve(SharedSchema::class)->ofDirection(1))
         )
         ->relationship(
             'warrenVotesDown',
             fn (Post $post) => $post->hasMany(Vote::class, 'post_id')
-                ->where(...votesOfDirection(-1))
+                ->where(...resolve(SharedSchema::class)->ofDirection(-1))
         ),
 
     /*

@@ -113,6 +113,23 @@ class SharedSchema
      * column of its own, so an unqualified `type` is ambiguous and the query
      * simply errors.
      */
+    /**
+     * The column and value a vote in this direction is stored as, for a
+     * `where()`.
+     *
+     * 🚨 Neither is a constant: see voteColumn(). Asked at call time rather
+     * than at boot so the answer cannot be cached from before a migration ran.
+     * A method, not a function declared in extend.php: a global function there
+     * is declared again each time the extension boots in the same process,
+     * which is a fatal error.
+     *
+     * @return array{string, int|string}
+     */
+    public function ofDirection(int $direction): array
+    {
+        return [$this->voteColumn(), $this->encode($direction)];
+    }
+
     public function sumExpression(string $qualifier = ''): string
     {
         $column = ($qualifier === '' ? '' : $qualifier.'.').$this->voteColumn();
