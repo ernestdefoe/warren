@@ -12,6 +12,12 @@
   --gap: var(--wr-gap);
 }
 
+// The columns' own top margins are zeroed below, so with no hero the sort bar
+// and the left rail sat hard against the header. One gap above them.
+.App--index .Page-container {
+  padding-top: var(--wr-gap);
+}
+
 .App--index {
   .Page-sidebar {
     --sidebar-width: var(--wr-rail-left);
