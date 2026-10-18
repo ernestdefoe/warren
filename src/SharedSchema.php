@@ -6,6 +6,7 @@
 
 namespace ErnestDefoe\Warren;
 
+use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Database\ConnectionInterface;
 
 /**
@@ -33,24 +34,51 @@ use Illuminate\Database\ConnectionInterface;
 class SharedSchema
 {
     /**
-     * Memoised per process. Neither answer can change inside one request, and
-     * the alternative is an information_schema query on every vote and every
-     * page of the discussion list.
+     * 🚨 Asked once per CACHE lifetime, never per request.
+     *
+     * A per-process memo alone was not enough: PHP-FPM starts every request
+     * with empty statics, so the "once" was once per request — two
+     * information_schema queries on every discussion list and every
+     * notification page, on forums that never cast a vote. Floxum's
+     * performance test counts exactly that, against the extension's name.
+     *
+     * The answer only changes when a migration renames a column, and those run
+     * on enable (Enabled is dispatched AFTER the migration, so the listener in
+     * extend.php sees the new shape), on uninstall, or from `php flarum
+     * migrate` — which is always followed by `cache:clear`, and that flushes
+     * this key with everything else.
      */
-    protected static ?bool $modernVotes = null;
-    protected static ?bool $renamedRank = null;
-    protected static ?bool $voteTimestamps = null;
+    public const CACHE_KEY = 'ernestdefoe-warren.shared-schema';
+
+    /** @var array{value: bool, timestamps: bool, trending: bool, userVotes: bool}|null */
+    protected static ?array $shape = null;
 
     public function __construct(
-        protected ConnectionInterface $db
+        protected ConnectionInterface $db,
+        protected Cache $cache
     ) {
+    }
+
+    /** @return array{value: bool, timestamps: bool, trending: bool, userVotes: bool} */
+    protected function shape(): array
+    {
+        return static::$shape ??= $this->cache->rememberForever(self::CACHE_KEY, function (): array {
+            $schema = $this->db->getSchemaBuilder();
+            $votes = $schema->getColumnListing('post_votes');
+
+            return [
+                'value' => in_array('value', $votes, true),
+                'timestamps' => in_array('value', $votes, true) && in_array('created_at', $votes, true),
+                'trending' => $schema->hasColumn('discussions', 'trending'),
+                'userVotes' => $schema->hasColumn('users', 'votes'),
+            ];
+        });
     }
 
     /** True once gamification's 2020 migration has converted the table. */
     public function hasValueColumn(): bool
     {
-        return static::$modernVotes ??= $this->db->getSchemaBuilder()
-            ->hasColumn('post_votes', 'value');
+        return $this->shape()['value'];
     }
 
     /** The column a vote's direction is stored in. */
@@ -62,10 +90,7 @@ class SharedSchema
     /** The column a discussion's time-decayed rank is stored in. */
     public function rankColumn(): string
     {
-        $renamed = static::$renamedRank ??= $this->db->getSchemaBuilder()
-            ->hasColumn('discussions', 'trending');
-
-        return $renamed ? 'trending' : 'hotness';
+        return $this->shape()['trending'] ? 'trending' : 'hotness';
     }
 
     /**
@@ -100,6 +125,23 @@ class SharedSchema
     }
 
     /**
+     * The column and value a vote in this direction is stored as, for a
+     * `where()`.
+     *
+     * 🚨 Neither is a constant: see voteColumn(). Asked at call time rather
+     * than at boot, so a forget() after a migration is seen by the next query.
+     * A method, not a function declared in extend.php: a global function there
+     * is declared again each time the extension boots in the same process,
+     * which is a fatal error.
+     *
+     * @return array{string, int|string}
+     */
+    public function ofDirection(int $direction): array
+    {
+        return [$this->voteColumn(), $this->encode($direction)];
+    }
+
+    /**
      * SQL summing a set of vote rows to a score, in this table's shape.
      *
      * 🚨 Takes a qualifier rather than hardcoding a table name. Raw SQL is
@@ -113,23 +155,6 @@ class SharedSchema
      * column of its own, so an unqualified `type` is ambiguous and the query
      * simply errors.
      */
-    /**
-     * The column and value a vote in this direction is stored as, for a
-     * `where()`.
-     *
-     * 🚨 Neither is a constant: see voteColumn(). Asked at call time rather
-     * than at boot so the answer cannot be cached from before a migration ran.
-     * A method, not a function declared in extend.php: a global function there
-     * is declared again each time the extension boots in the same process,
-     * which is a fatal error.
-     *
-     * @return array{string, int|string}
-     */
-    public function ofDirection(int $direction): array
-    {
-        return [$this->voteColumn(), $this->encode($direction)];
-    }
-
     public function sumExpression(string $qualifier = ''): string
     {
         $column = ($qualifier === '' ? '' : $qualifier.'.').$this->voteColumn();
@@ -149,8 +174,7 @@ class SharedSchema
      */
     public function voteHasTimestamps(): bool
     {
-        return static::$voteTimestamps ??= $this->hasValueColumn()
-            && $this->db->getSchemaBuilder()->hasColumn('post_votes', 'created_at');
+        return $this->shape()['timestamps'];
     }
 
     /**
@@ -163,14 +187,13 @@ class SharedSchema
      */
     public function tracksUserPoints(): bool
     {
-        return $this->db->getSchemaBuilder()->hasColumn('users', 'votes');
+        return $this->shape()['userVotes'];
     }
 
-    /** Test seam; also used by the console command after a schema change. */
-    public static function forget(): void
+    /** After a schema change: an extension enabled, disabled or uninstalled. */
+    public function forget(): void
     {
-        static::$modernVotes = null;
-        static::$renamedRank = null;
-        static::$voteTimestamps = null;
+        static::$shape = null;
+        $this->cache->forget(self::CACHE_KEY);
     }
 }

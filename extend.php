@@ -17,6 +17,7 @@ use Flarum\Api\Resource;
 use Flarum\Api\Sort\SortColumn;
 use Flarum\Discussion\Discussion;
 use Flarum\Extend;
+use Flarum\Extension\Event as ExtensionEvent;
 use Flarum\Frontend\Document;
 use Flarum\Post\Post;
 use Flarum\Settings\SettingsRepositoryInterface;
@@ -139,6 +140,17 @@ return [
         // read by the HashtagCloud widget
         ->default('ernestdefoe-warren.hashtag_count', 24)
         ->serializeToForum('warrenHashtagCount', 'ernestdefoe-warren.hashtag_count', 'intval'),
+
+    /*
+     * 🚨 SharedSchema caches which column names this forum has; the two events
+     * that run or reverse a migration drop that answer. Enabled fires
+     * after the extension's migrations, so the next request reads the new
+     * shape. `php flarum migrate` has no event, and is always followed by
+     * cache:clear, which flushes the key with everything else.
+     */
+    (new Extend\Event())
+        ->listen(ExtensionEvent\Enabled::class, fn () => resolve(SharedSchema::class)->forget())
+        ->listen(ExtensionEvent\Uninstalled::class, fn () => resolve(SharedSchema::class)->forget()),
 
     (new Extend\ApiResource(Resource\ForumResource::class))
         ->fields(Api\ForumResourceFields::class),
