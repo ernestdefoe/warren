@@ -41,6 +41,11 @@ use Illuminate\Database\Schema\Builder;
  * reasoning; the short version is that disabling a theme must never destroy
  * data another extension is still reading.
  */
+/*
+ * Raw Builder closures, not Flarum\Database\Migration helpers, on purpose:
+ * createTableIfNotExists() and addColumns() generate a `down` that drops the
+ * table/columns, and these are shared with fof/gamification (see above).
+ */
 return [
     'up' => function (Builder $schema) {
         if ($schema->hasColumn('discussions', 'votes')) {
@@ -56,7 +61,15 @@ return [
              * a default is invisible to a reader and to gamification's guard.
              */
             $table->integer('votes')->default(0);
-            $table->float('hotness', 10, 4)->default(0);
+            /*
+             * float(10) is MySQL/Postgres single-precision FLOAT/REAL — the
+             * same 4-byte column gamification's `float('hotness', 10, 4)`
+             * produces on Flarum 2 (Laravel dropped the third argument), and
+             * what FLOAT(10,4) stored on Flarum 1. Kept, not widened to
+             * double: whichever extension migrates first defines this shared
+             * column, so both must declare the same type.
+             */
+            $table->float('hotness', 10)->default(0);
         });
     },
 

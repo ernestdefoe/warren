@@ -114,14 +114,26 @@ class SharedSchema
         return $direction > 0 ? 'Up' : 'Down';
     }
 
-    /** Turn whatever this table stores back into 1 or -1. */
+    /**
+     * Turn whatever this table stores back into 1, -1, or 0 for "no vote".
+     *
+     * 🚨 0 is a real row, not corruption. fof/gamification 2.x retracts a vote
+     * by saving `value = 0` rather than deleting the row, so a forum that has
+     * ever run it carries such rows. Read as +1, they showed the member an
+     * upvote they had taken back, and their next click on the up arrow
+     * "cleared" it instead of casting it.
+     */
     public function decode(mixed $stored): int
     {
         if ($this->hasValueColumn()) {
-            return (int) $stored >= 0 ? 1 : -1;
+            return (int) $stored <=> 0;
         }
 
-        return $stored === 'Up' ? 1 : -1;
+        return match ($stored) {
+            'Up' => 1,
+            'Down' => -1,
+            default => 0,
+        };
     }
 
     /**

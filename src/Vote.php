@@ -33,6 +33,9 @@ class Vote extends AbstractModel
     public const UP = 1;
     public const DOWN = -1;
 
+    /** Resolved once per instance; a model cannot take constructor injection. */
+    protected ?SharedSchema $sharedSchema = null;
+
     /**
      * 🚨 Decided per instance, not declared.
      *
@@ -46,20 +49,28 @@ class Vote extends AbstractModel
     {
         parent::__construct($attributes);
 
-        $this->timestamps = resolve(SharedSchema::class)->voteHasTimestamps();
+        $this->timestamps = $this->sharedSchema()->voteHasTimestamps();
     }
 
-    /** 1 or -1, whichever shape the row is stored in. */
+    protected function sharedSchema(): SharedSchema
+    {
+        return $this->sharedSchema ??= resolve(SharedSchema::class);
+    }
+
+    /**
+     * 1, -1, or 0 for a retracted vote (see SharedSchema::decode), whichever
+     * shape the row is stored in.
+     */
     public function direction(): int
     {
-        $schema = resolve(SharedSchema::class);
+        $schema = $this->sharedSchema();
 
         return $schema->decode($this->getAttribute($schema->voteColumn()));
     }
 
     public function setDirection(int $direction): static
     {
-        $schema = resolve(SharedSchema::class);
+        $schema = $this->sharedSchema();
 
         $this->setAttribute($schema->voteColumn(), $schema->encode($direction));
 

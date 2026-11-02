@@ -98,12 +98,10 @@ class PostResourceFields
             return null;
         }
 
-        $vote = $post->warrenVotes->first();
-
-        if ($vote === null) {
-            return null;
-        }
-
-        return $vote->direction() > 0 ? 'up' : 'down';
+        return match ($post->warrenVotes->first()?->direction()) {
+            1 => 'up',
+            -1 => 'down',
+            default => null, // no row, or a retracted one (SharedSchema::decode)
+        };
     }
 }

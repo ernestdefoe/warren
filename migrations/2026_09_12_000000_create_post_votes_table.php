@@ -47,6 +47,11 @@ use Illuminate\Database\Schema\Builder;
  * (Gamification's own `down` does drop it. That is their call and outside our
  * reach; it is documented in the README so nobody is surprised by it.)
  */
+/*
+ * Raw Builder closures, not Flarum\Database\Migration helpers, on purpose:
+ * createTableIfNotExists() and addColumns() generate a `down` that drops the
+ * table/columns, and these are shared with fof/gamification (see above).
+ */
 return [
     'up' => function (Builder $schema) {
         if ($schema->hasTable('post_votes')) {

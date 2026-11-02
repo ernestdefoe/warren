@@ -159,13 +159,11 @@ class DiscussionResourceFields
             return null;
         }
 
-        $vote = $discussion->warrenVotes->first();
-
-        if ($vote === null) {
-            return null;
-        }
-
-        return $vote->direction() > 0 ? 'up' : 'down';
+        return match ($discussion->warrenVotes->first()?->direction()) {
+            1 => 'up',
+            -1 => 'down',
+            default => null, // no row, or a retracted one (SharedSchema::decode)
+        };
     }
 
     /**
