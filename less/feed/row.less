@@ -169,6 +169,12 @@
   display: none;
 }
 
+// Core keeps 170px clear on the right of the excerpt for the stats bubble,
+// which Warren hides below. Left in place it cut every excerpt short.
+[data-warren] .DiscussionListItem-info .item-excerpt {
+  margin-right: 0;
+}
+
 [data-warren] .DiscussionListItem-info:empty {
   display: none;
 }

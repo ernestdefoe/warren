@@ -25,10 +25,15 @@
   }
 
   .Page-content {
-    // Fixed rather than fluid: the point of the layout is a column of a known,
-    // readable width, with the rails absorbing the slack.
+    // A column of a known, readable width, with the rails absorbing the slack.
+    //
+    // 🚨 It may SHRINK, though. The three columns and their gaps want 1418px,
+    // so a feed that cannot shrink overflows every window from 992px (where
+    // the layout stacks) to 1417px - and `justify-content: center` spills
+    // that overflow off BOTH edges, pushing the left rail off screen and
+    // giving every page a sideways scroll.
     width: var(--wr-feed-width);
-    flex: 0 0 var(--wr-feed-width);
+    flex: 0 1 var(--wr-feed-width);
     min-width: 0;
     margin-top: 0;
 
@@ -52,9 +57,11 @@
   }
 }
 
+// Shrinks with the feed (see .Page-content above); the left rail keeps its
+// width, so navigation never narrows.
 .Warren-rail {
   width: var(--wr-rail-right);
-  flex: 0 0 var(--wr-rail-right);
+  flex: 0 1 var(--wr-rail-right);
   min-width: 0;
   position: sticky;
   // Clear the fixed header so a sticky rail does not slide under it.
