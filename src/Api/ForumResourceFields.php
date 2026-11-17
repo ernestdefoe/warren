@@ -8,7 +8,10 @@ namespace ErnestDefoe\Warren\Api;
 
 use ErnestDefoe\Warren\SharedSchema;
 use Flarum\Api\Schema;
+use Flarum\Discussion\Discussion;
 use Flarum\Extension\ExtensionManager;
+use Flarum\Post\CommentPost;
+use Flarum\User\Guest;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Database\ConnectionInterface;
 
@@ -69,15 +72,20 @@ class ForumResourceFields
              * Cached, because this is three COUNT(*) queries on the busiest
              * page of the forum and the answer is furniture, not data anyone
              * acts on.
+             *
+             * 🚨 Discussions and posts are counted as a GUEST sees them. One
+             * cached number goes to everyone, so it may only count what
+             * everyone may see: a raw COUNT(*) told every visitor how many
+             * private, hidden and staff-tag discussions the forum holds.
              */
             Schema\Integer::make('warrenDiscussionCount')
-                ->get(fn (): int => $this->count('discussions')),
+                ->get(fn (): int => $this->count('discussions', fn () => Discussion::query()->whereVisibleTo(new Guest())->count())),
 
             Schema\Integer::make('warrenPostCount')
-                ->get(fn (): int => $this->count('posts')),
+                ->get(fn (): int => $this->count('posts', fn () => CommentPost::query()->whereVisibleTo(new Guest())->count())),
 
             Schema\Integer::make('warrenMemberCount')
-                ->get(fn (): int => $this->count('users')),
+                ->get(fn (): int => $this->count('users', fn () => $this->db->table('users')->count())),
 
             /*
              * The API sort strings behind Hot and Top.
@@ -109,12 +117,11 @@ class ForumResourceFields
         ];
     }
 
-    protected function count(string $table): int
+    /** @param \Closure(): int $query */
+    protected function count(string $name, \Closure $query): int
     {
-        return (int) $this->cache->remember(
-            'ernestdefoe-warren.count.'.$table,
-            self::COUNT_TTL,
-            fn () => $this->db->table($table)->count()
-        );
+        // `.v2`: the unscoped totals cached before guest visibility must not
+        // outlive the update by a full TTL.
+        return (int) $this->cache->remember('ernestdefoe-warren.count.v2.'.$name, self::COUNT_TTL, $query);
     }
 }

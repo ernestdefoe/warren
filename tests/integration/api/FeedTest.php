@@ -92,6 +92,20 @@ class FeedTest extends WarrenTestCase
     }
 
     #[Test]
+    public function the_about_counts_only_count_what_a_guest_may_see()
+    {
+        $this->database()->table('discussions')->where('id', 2)->update(['hidden_at' => Carbon::now()]);
+        $this->database()->table('posts')->where('id', 2)->update(['is_private' => true]);
+
+        // A member asks first: the cached number must still be the guest's.
+        [, $body] = $this->call('GET', '/api', 1);
+        $forum = $body['data']['attributes'];
+
+        $this->assertSame(1, $forum['warrenDiscussionCount'], 'The hidden discussion is not counted');
+        $this->assertSame(2, $forum['warrenPostCount'], 'Hidden, private, and posts of a hidden discussion are not counted');
+    }
+
+    #[Test]
     public function the_forum_payload_carries_what_the_theme_needs()
     {
         [, $body] = $this->call('GET', '/api');
@@ -99,6 +113,7 @@ class FeedTest extends WarrenTestCase
 
         $this->assertSame('warrenVote', $forum['warrenVoteField']);
         $this->assertSame(2, $forum['warrenDiscussionCount']);
+        $this->assertSame(4, $forum['warrenPostCount'], 'Hidden post 4 is not counted');
         $this->assertSame(4, $forum['warrenMemberCount']);
         $this->assertSame('-hotness,-createdAt', $forum['warrenHotSort']);
         $this->assertSame('-votes', $forum['warrenTopSort']);
