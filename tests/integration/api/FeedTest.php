@@ -96,13 +96,14 @@ class FeedTest extends WarrenTestCase
     {
         $this->database()->table('discussions')->where('id', 2)->update(['hidden_at' => Carbon::now()]);
         $this->database()->table('posts')->where('id', 2)->update(['is_private' => true]);
+        $this->database()->table('posts')->insert(['id' => 5, 'discussion_id' => 1, 'number' => 5, 'created_at' => Carbon::now(), 'user_id' => 2, 'type' => 'discussionRenamed', 'content' => '["Old","Newer"]']);
 
         // A member asks first: the cached number must still be the guest's.
         [, $body] = $this->call('GET', '/api', 1);
         $forum = $body['data']['attributes'];
 
         $this->assertSame(1, $forum['warrenDiscussionCount'], 'The hidden discussion is not counted');
-        $this->assertSame(2, $forum['warrenPostCount'], 'Hidden, private, and posts of a hidden discussion are not counted');
+        $this->assertSame(2, $forum['warrenPostCount'], 'Hidden, private, event posts and posts of a hidden discussion are not counted');
     }
 
     #[Test]

@@ -82,7 +82,7 @@ class ForumResourceFields
                 ->get(fn (): int => $this->count('discussions', fn () => Discussion::query()->whereVisibleTo(new Guest())->count())),
 
             Schema\Integer::make('warrenPostCount')
-                ->get(fn (): int => $this->count('posts', fn () => CommentPost::query()->whereVisibleTo(new Guest())->count())),
+                ->get(fn (): int => $this->count('posts', fn () => CommentPost::query()->where('type', CommentPost::$type)->whereVisibleTo(new Guest())->count())),
 
             Schema\Integer::make('warrenMemberCount')
                 ->get(fn (): int => $this->count('users', fn () => $this->db->table('users')->count())),
