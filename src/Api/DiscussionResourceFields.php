@@ -13,6 +13,7 @@ use Flarum\Api\Resource\DiscussionResource;
 use Flarum\Api\Schema;
 use Flarum\Discussion\Discussion;
 use Flarum\Post\CommentPost;
+use Flarum\User\User;
 use s9e\TextFormatter\Utils;
 
 /**
@@ -93,7 +94,7 @@ class DiscussionResourceFields
              */
             Schema\Str::make('warrenImage')
                 ->visible(fn (Discussion $discussion, Context $context) => $this->canPreview($discussion, $context))
-                ->get(fn (Discussion $discussion): ?string => $this->firstImage($discussion)),
+                ->get(fn (Discussion $discussion, Context $context): ?string => $this->firstImage($discussion, $context)),
 
             /*
              * The opening post as plain text, for posts with no picture.
@@ -104,7 +105,7 @@ class DiscussionResourceFields
              */
             Schema\Str::make('warrenExcerpt')
                 ->visible(fn (Discussion $discussion, Context $context) => $this->canPreview($discussion, $context))
-                ->get(fn (Discussion $discussion): ?string => $this->excerpt($discussion)),
+                ->get(fn (Discussion $discussion, Context $context): ?string => $this->excerpt($discussion, $context)),
 
             /*
              * The post ids in reply order, and a depth for each.
@@ -187,7 +188,7 @@ class DiscussionResourceFields
         return $context->listing();
     }
 
-    protected function firstPostXml(Discussion $discussion): ?string
+    protected function firstPostXml(Discussion $discussion, Context $context): ?string
     {
         if (! $discussion->relationLoaded('firstPost')) {
             return null;
@@ -195,7 +196,7 @@ class DiscussionResourceFields
 
         $post = $discussion->getRelation('firstPost');
 
-        if (! $post instanceof CommentPost) {
+        if (! $post instanceof CommentPost || ! $this->mayRead($post, $discussion, $context->getActor())) {
             return null;
         }
 
@@ -204,9 +205,32 @@ class DiscussionResourceFields
         return is_string($xml) && $xml !== '' ? $xml : null;
     }
 
-    protected function firstImage(Discussion $discussion): ?string
+    /**
+     * 🚨 The preview IS the post, so it follows the post's own visibility.
+     *
+     * Core scopes the `firstPost` eager load, so on its own a reader who may
+     * not see the post gets null here. That only holds while Warren's load is
+     * the one that runs: an extension whose index `after` hook loads
+     * `firstPost` itself leaves an UNSCOPED post in the relation, core's
+     * `loadMissing` skips it, and the excerpt would ship a hidden post's text
+     * to every guest. So the rules are restated here, allow-list style:
+     * hidden posts for their author and whoever may hide posts in the
+     * discussion (core's own rule), private posts for their author only.
+     */
+    protected function mayRead(CommentPost $post, Discussion $discussion, User $actor): bool
     {
-        $xml = $this->firstPostXml($discussion);
+        $isAuthor = $actor->exists && (int) $post->user_id === (int) $actor->id;
+
+        if ($post->hidden_at !== null && ! $isAuthor && ! $actor->can('hidePosts', $discussion)) {
+            return false;
+        }
+
+        return ! $post->is_private || $isAuthor;
+    }
+
+    protected function firstImage(Discussion $discussion, Context $context): ?string
+    {
+        $xml = $this->firstPostXml($discussion, $context);
 
         if ($xml === null) {
             return null;
@@ -242,9 +266,9 @@ class DiscussionResourceFields
         return null;
     }
 
-    protected function excerpt(Discussion $discussion): ?string
+    protected function excerpt(Discussion $discussion, Context $context): ?string
     {
-        $xml = $this->firstPostXml($discussion);
+        $xml = $this->firstPostXml($discussion, $context);
 
         if ($xml === null) {
             return null;
